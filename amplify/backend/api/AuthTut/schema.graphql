@@ -1,0 +1,29 @@
+type User {
+  username: String
+  Id: ID
+  mileage: Float
+  moneyRaised: Float
+  strikes: Int
+  charity: String
+  stravaRefresh: String
+}
+
+type GroupsModel @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  usersList: [User]
+  host: User!
+  moneyMile: Float
+  minMile: Int
+}
+
+type UsersModel @model @auth(rules: [{allow: public}]) {
+  id: ID!
+  email: String!
+  username: String!
+  groups: [ID]
+  totalMileage: Int
+  totalMoneyRaised: Float
+  totalMoneyDonated: Float
+  stravaRefresh: String
+}
+ 
