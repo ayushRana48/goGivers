@@ -1,8 +1,8 @@
 {
   "version": 1,
   "paths": {
-    "/users": {
-      "name": "/users",
+    "/goGivers": {
+      "name": "/goGivers",
       "lambdaFunction": "getUsers",
       "permissions": {
         "setting": "open"

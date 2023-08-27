@@ -9,6 +9,8 @@ import React from 'react';
 import type {PropsWithChildren} from 'react';
 import config from './src/aws-exports'
 import { Amplify, Auth } from 'aws-amplify';
+import MainNav from './src/MainNav';
+import { UserProvider } from './UserContext';
 
 import {
   SafeAreaView,
@@ -20,6 +22,7 @@ import {
   View,
 } from 'react-native';
 import Nav from './src/Nav';
+import { User } from './src/models';
 
 Amplify.configure(config)
 const App = () => {
@@ -27,7 +30,9 @@ const App = () => {
 
   return (
     <SafeAreaView style={styles.root}>
-      <Nav></Nav>
+      <UserProvider>
+        <Nav></Nav>
+      </UserProvider>
     </SafeAreaView>
   );
 };

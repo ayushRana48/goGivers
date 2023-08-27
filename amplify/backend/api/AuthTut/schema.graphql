@@ -1,3 +1,8 @@
+type Invite {
+  sender: String
+  groupId: String
+}
+
 type User {
   username: String
   Id: ID
@@ -14,6 +19,10 @@ type GroupsModel @model @auth(rules: [{allow: public}]) {
   host: User!
   moneyMile: Float
   minMile: Int
+  minDays: Int
+  groupName: String
+  invites: [String]
+  startDate: AWSDate
 }
 
 type UsersModel @model @auth(rules: [{allow: public}]) {
@@ -25,5 +34,6 @@ type UsersModel @model @auth(rules: [{allow: public}]) {
   totalMoneyRaised: Float
   totalMoneyDonated: Float
   stravaRefresh: String
+  invites: [Invite]
 }
  

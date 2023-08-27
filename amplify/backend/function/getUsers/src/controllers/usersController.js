@@ -6,7 +6,9 @@ AWS.config.update({ region: 'us-west-1' });
 const docClient = new AWS.DynamoDB.DocumentClient();
 
 
-
+const test2 = async(req,res)=>{
+  res.json("success2")
+}
 //register unser
 const newUser = async (req, res) => {
   const { username, email } = req.body;
@@ -104,4 +106,4 @@ const reauthorizeStrava = async (req, res) => {
 
 
 
-module.exports={newUser,addStravaRefresh,reauthorizeStrava};
+module.exports={test2,newUser,addStravaRefresh,reauthorizeStrava};

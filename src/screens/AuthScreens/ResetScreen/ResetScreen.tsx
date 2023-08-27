@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet,Image,useWindowDimensions,Alert } from "react-native";
-import CustomInput from "../../components/CustomInput/CustomInput"
-import CustomButton from "../../components/CustomButton/CustomButton"
+import CustomInput from "../../../components/CustomInput/CustomInput"
+import CustomButton from "../../../components/CustomButton/CustomButton"
 import { Auth } from "aws-amplify";
 
 const ResetScreen = ({navigation}:any)=>{

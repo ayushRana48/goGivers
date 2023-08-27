@@ -4,6 +4,20 @@ import { LazyLoading, LazyLoadingDisabled } from "@aws-amplify/datastore";
 
 
 
+type EagerInvite = {
+  readonly sender?: string | null;
+  readonly groupId?: string | null;
+}
+
+type LazyInvite = {
+  readonly sender?: string | null;
+  readonly groupId?: string | null;
+}
+
+export declare type Invite = LazyLoading extends LazyLoadingDisabled ? EagerInvite : LazyInvite
+
+export declare const Invite: (new (init: ModelInit<Invite>) => Invite)
+
 type EagerUser = {
   readonly username?: string | null;
   readonly Id?: string | null;
@@ -38,6 +52,9 @@ type EagerGroupsModel = {
   readonly host: User;
   readonly moneyMile?: number | null;
   readonly minMile?: number | null;
+  readonly groupName?: string | null;
+  readonly invites?: (string | null)[] | null;
+  readonly startDate?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -52,6 +69,9 @@ type LazyGroupsModel = {
   readonly host: User;
   readonly moneyMile?: number | null;
   readonly minMile?: number | null;
+  readonly groupName?: string | null;
+  readonly invites?: (string | null)[] | null;
+  readonly startDate?: string | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -75,6 +95,7 @@ type EagerUsersModel = {
   readonly totalMoneyRaised?: number | null;
   readonly totalMoneyDonated?: number | null;
   readonly stravaRefresh?: string | null;
+  readonly invites?: (Invite | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }
@@ -92,6 +113,7 @@ type LazyUsersModel = {
   readonly totalMoneyRaised?: number | null;
   readonly totalMoneyDonated?: number | null;
   readonly stravaRefresh?: string | null;
+  readonly invites?: (Invite | null)[] | null;
   readonly createdAt?: string | null;
   readonly updatedAt?: string | null;
 }

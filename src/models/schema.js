@@ -43,6 +43,28 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "groupName": {
+                    "name": "groupName",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "invites": {
+                    "name": "invites",
+                    "isArray": true,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
+                "startDate": {
+                    "name": "startDate",
+                    "isArray": false,
+                    "type": "AWSDate",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -145,6 +167,16 @@ export const schema = {
                     "isRequired": false,
                     "attributes": []
                 },
+                "invites": {
+                    "name": "invites",
+                    "isArray": true,
+                    "type": {
+                        "nonModel": "Invite"
+                    },
+                    "isRequired": false,
+                    "attributes": [],
+                    "isArrayNullable": true
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -190,6 +222,25 @@ export const schema = {
     },
     "enums": {},
     "nonModels": {
+        "Invite": {
+            "name": "Invite",
+            "fields": {
+                "sender": {
+                    "name": "sender",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                },
+                "groupId": {
+                    "name": "groupId",
+                    "isArray": false,
+                    "type": "String",
+                    "isRequired": false,
+                    "attributes": []
+                }
+            }
+        },
         "User": {
             "name": "User",
             "fields": {
@@ -246,5 +297,5 @@ export const schema = {
         }
     },
     "codegenVersion": "3.4.4",
-    "version": "de4df1d55879ac21b4618902f19a8f13"
+    "version": "7cbe4c56535d96d343e999f3ef7ba050"
 };

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet,Image,useWindowDimensions,Alert } from "react-native";
-import CustomInput from "../../components/CustomInput/CustomInput"
-import CustomButton from "../../components/CustomButton/CustomButton"
+import CustomInput from "../../../components/CustomInput/CustomInput"
+import CustomButton from "../../../components/CustomButton/CustomButton"
 import {useNavigation, NavigationContainerRef, NavigationProp} from '@react-navigation/native';
 import {Auth,API} from 'aws-amplify'
 

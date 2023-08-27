@@ -1,21 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import {View, Text, Button} from 'react-native';
-import CustomButton from '../../components/CustomButton';
+import CustomButton from '../../../components/CustomButton';
 import {useNavigation, NavigationContainerRef, NavigationProp} from '@react-navigation/native';
 import { useRoute } from "@react-navigation/native";
 import { Auth,API } from "aws-amplify";
 import { authorize } from 'react-native-app-auth';
 import { Linking } from 'react-native'
+import { useUserContext } from '../../../../UserContext';
 import 'react-native-url-polyfill/auto'
 
 
-const Home = ({navigation}:any) => {
+const Profile = ({navigation}:any) => {
+
 
   //@ts-ignore
   const [username,setUsername]= useState(useRoute()?.params?.username)
   const [missingScope,setMissingScope]=useState(false)
-  
+  const { setUser,user } = useUserContext();
 
+  
+  useEffect(()=>{
+    console.log(user)
+    console.log("from Profile")
+  },[])
   const getAuth =async() =>{  
     const client_id='111319'
     const client_secret='b03bfa9b476ff3e1536d632e33224d6b23f0f506';
@@ -63,6 +70,7 @@ const Home = ({navigation}:any) => {
   const Logout = async () => {
     try{
       console.log('check')
+      setUser("");
       const x=await Auth.signOut()
       console.log(x)
       navigation.navigate('SignIn');
@@ -79,7 +87,7 @@ const Home = ({navigation}:any) => {
       <View style={{marginTop:60}}>
         <CustomButton text='Connect to Strava' onPress={getAuth} type={'primary'} bgColor='#FC4C02' color='white'></CustomButton>
         {missingScope?<Text style={{fontSize: 12, alignSelf: 'center', color:'red'}}>Missing read all scope. Try Strava Auth Again</Text>
-        :<Text style={{fontSize: 24, alignSelf: 'center'}}>Welcome {username}</Text>}
+        :<Text style={{fontSize: 24, alignSelf: 'center'}}>Welcome {user}</Text>}
         <View style={{marginTop:60}}>
           <CustomButton text="Logout" onPress={Logout} type={'primary'} />
         </View>
@@ -90,4 +98,4 @@ const Home = ({navigation}:any) => {
 
 };
 
-export default Home;
+export default Profile;
