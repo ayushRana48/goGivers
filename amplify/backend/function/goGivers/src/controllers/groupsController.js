@@ -54,7 +54,7 @@ const newGroup = async (req, res) => {
     const params = {
       TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
       Item: {
-        host: hostUser,
+        host: data.Item,
         groupName: groupName,
         moneyMile:moneyMile,
         minMile:minMile,
