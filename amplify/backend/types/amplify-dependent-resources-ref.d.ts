@@ -5,7 +5,7 @@ export type AmplifyDependentResourcesAttributes = {
       "GraphQLAPIIdOutput": "string",
       "GraphQLAPIKeyOutput": "string"
     },
-    "usersAPI": {
+    "goGivers": {
       "ApiId": "string",
       "ApiName": "string",
       "RootUrl": "string"
@@ -23,7 +23,7 @@ export type AmplifyDependentResourcesAttributes = {
     }
   },
   "function": {
-    "getUsers": {
+    "goGivers": {
       "Arn": "string",
       "LambdaExecutionRole": "string",
       "LambdaExecutionRoleArn": "string",

@@ -23,6 +23,7 @@ type GroupsModel @model @auth(rules: [{allow: public}]) {
   groupName: String
   invites: [String]
   startDate: AWSDate
+  moneyPool:Float
 }
 
 type UsersModel @model @auth(rules: [{allow: public}]) {

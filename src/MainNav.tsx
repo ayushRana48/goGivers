@@ -11,7 +11,7 @@ const Tab = createBottomTabNavigator();
 
 export default function MainNav() {
     return (
-        <Tab.Navigator>
+        <Tab.Navigator screenOptions={{ headerShown: false }}>
           <Tab.Screen name="Activity" component={Activity} />
           <Tab.Screen name="Groups" component={Groups} />
           <Tab.Screen name="Profile" component={Profile} />

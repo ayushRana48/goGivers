@@ -3,7 +3,7 @@
   "paths": {
     "/goGivers": {
       "name": "/goGivers",
-      "lambdaFunction": "getUsers",
+      "lambdaFunction": "goGivers",
       "permissions": {
         "setting": "open"
       }

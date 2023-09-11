@@ -36,7 +36,8 @@ const newUser = async (req, res) => {
     res.json({ data: data, newUser:params.Item, success: 'very successful' });
   } catch (err) {
     console.error('Error creating item:', err);
-    res.json({ error: err });
+    res.status(400).json({ errorMessage:err});
+
   }
 
   console.log("jkhliokhkjg");
@@ -64,7 +65,7 @@ const addStravaRefresh = async(req,res)=>{
     res.json({ data: data, newUser:params.Item, success: 'very successful', refresh_token:refresh });
   } catch (err) {
     console.error('Error addinf refresh:', err);
-    res.json({ error: err });
+    res.status(400).json({ errorMessage:err });
   }
 }
 
@@ -105,5 +106,29 @@ const reauthorizeStrava = async (req, res) => {
 }
 
 
+const getUser=async(req,res)=>{
+  const  username  = req.query.username;
 
-module.exports={test2,newUser,addStravaRefresh,reauthorizeStrava};
+  const userParams = {
+    TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': username },
+  };
+
+  try {
+    const data = await docClient.get(userParams).promise();
+    if(data.Item==null){
+      res.status(400).json({ errorMessage:'User not found' });
+      return;
+    }
+    else{
+      res.json({user:data.Item})
+    }
+  }
+    catch(error){
+      console.log("error",error);
+    }
+}
+
+
+
+module.exports={test2,newUser,addStravaRefresh,reauthorizeStrava,getUser};

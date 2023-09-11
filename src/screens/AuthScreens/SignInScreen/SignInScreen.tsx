@@ -56,13 +56,12 @@ const SignInScreen = ({navigation}:any)=>{
         <View style={styles.root}>
             <Image source={require("../../../../assets/images/logo.png")} style={styles.logo}></Image>
             <CustomInput value={username} setValue={setUsername} placeholder="Username" secureTextEntry={false}></CustomInput>
-            <CustomInput value={password} setValue={setPassword} placeholder="Password" secureTextEntry></CustomInput>
+            <CustomInput value={password} setValue={setPassword} placeholder="Password" secureTextEntry ></CustomInput>
             <CustomButton onPress={onSignInPressed} text={loading? "Loading..." : "Sign in"} type="primary"></CustomButton>
             <CustomButton onPress={onForgotPassword} text={"Forgot Password"} type="tertiary"></CustomButton>
             <View style={styles.horizontalBar} />
             <CustomButton onPress={onPressNew} text={"Don't have an account? Register Here"} type="tertiary"></CustomButton>
-            <Text className="text-violet-700">dfdsgf</Text>
-            <Text className="font-bold mt-20" >fse;odfksld</Text>
+    
         </View>
     )
 }
@@ -75,6 +74,7 @@ const styles = StyleSheet.create({
         height:'100%',
         padding:40,
         paddingBottom:20,
+        backgroundColor:'white'
     },
     logo:{
         width:'50%',

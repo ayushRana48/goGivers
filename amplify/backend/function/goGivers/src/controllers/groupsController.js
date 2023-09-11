@@ -18,9 +18,8 @@ function generateRandomSequence(length) {
 
   return result;
 }
-const test =async(req,res)=>{
-  res.json("success");
-}
+
+
 const newGroup = async (req, res) => {
   const { username, groupName,moneyMile,minMile,minDays } = req.body;
   const randomSequence = generateRandomSequence(6);
@@ -33,7 +32,7 @@ const newGroup = async (req, res) => {
   try {
     const data = await docClient.get(userParams).promise();
     if(data.Item==null){
-      res.json({error:"User not found"});
+      res.status(400).json({ errorMessage: 'User not found' });
       return;
     }
     else{
@@ -42,10 +41,20 @@ const newGroup = async (req, res) => {
 
     const groupId = groupName + ' #' + randomSequence
 
+    const hostUser = {
+      username: data.Item.username,
+      Id: data.Item.id,
+      mileage: 0,
+      moneyRaised: 0,
+      strikes: 0,
+      charity: data.Item.charity,
+      stravaRefresh: data.Item.stravaRefresh,
+    };
+
     const params = {
       TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
       Item: {
-        host: data.Item,
+        host: hostUser,
         groupName: groupName,
         moneyMile:moneyMile,
         minMile:minMile,
@@ -76,13 +85,13 @@ const newGroup = async (req, res) => {
       const putResult = await docClient.put(params).promise();
       res.json({ data: putResult, newGroup: params.Item, success: 'Group created successfully', newGroup2: data.Item });
     } catch (putErr) {
-      console.error('Error creating item:', putErr);
+      res.status(400).json({ errorMessage: 'Error Creating Item' });
       res.json({ error: putErr });
     }
 
   } catch (err) {
     console.error('Error adding refresh:', err);
-    res.json({ error: err });
+    res.status(400).json({ errorMessage: 'ErrorAdding Refresh' });
   }
 };
 
@@ -105,11 +114,11 @@ const deleteGroup = async (req, res) => {
   try {
     const groupData = await docClient.get(groupParams).promise();
     if (groupData.Item == null) {
-      res.json({ error: "Group not found" });
+      res.status(400).json({ errorMessage: 'Group Not found' });
       return;
     } else {
       if (groupData.Item.host.Item.username !== username) {
-        res.json({ error: "Not the host" });
+        res.status(400).json({ errorMessage: 'Not the host' });
         return;
       }
     }
@@ -122,7 +131,7 @@ const deleteGroup = async (req, res) => {
     try {
       const userData = await docClient.get(userParams).promise();
       if (userData.Item == null) {
-        res.json({ error: "User not found" });
+        res.status(400).json({ errorMessage: 'User not found' });
         return;
       } else {
         // Remove groupId from user's groups attribute
@@ -149,16 +158,16 @@ const deleteGroup = async (req, res) => {
           res.json({ success: 'Group deleted successfully' });
         } catch (deleteErr) {
           console.error('Error deleting group:', deleteErr);
-          res.json({ error: deleteErr });
+          res.status(400).json({ errorMessage: 'Error deleting group' });
         }
       }
     } catch (getUserErr) {
       console.error('Error getting user data:', getUserErr);
-      res.json({ error: getUserErr });
+      res.status(400).json({ errorMessage: 'Cant get user data' });
     }
 
   } catch (err) {
-    console.error('Error getting group data:', err);
+    res.status(400).json({ errorMessage: 'Cant get group data' });
     res.json({ error: err });
   }
 };
@@ -198,13 +207,13 @@ const sendInvite = async (req, res) => {
     console.log(groupData)
 
     if (groupData.Item == null) {
-      res.json({ error: "Group not found" });
+      res.status(400).json({ errorMessage: 'Group not found' });
       return;
     } else {
       const userInGroup = groupData.Item.usersList.some(user => user.Item.username == username);
       const senderInGroup = groupData.Item.usersList.some(user => user.Item.username == sender);
       if (userInGroup) {
-        res.json({ error: "User already in Group" });
+        res.status(400).json({ errorMessage: 'User already in group' });
         return;
       }
       console.log(groupData.Item.usersList[0].username===sender)
@@ -212,7 +221,7 @@ const sendInvite = async (req, res) => {
       console.log(groupData.Item.usersList[0].Item.username)
 
       if (!senderInGroup) {
-        res.json({ error: "Sender not in group" });
+        res.status(400).json({ errorMessage: 'Sender not in group' });
         return;
       }
     }
@@ -231,7 +240,7 @@ const sendInvite = async (req, res) => {
 
     
   }catch(error){
-    res.json({ error: "unknown error" });
+    res.status(400).json({ errorMessage: 'Unkown error' });
   }
 
 
@@ -241,7 +250,7 @@ const sendInvite = async (req, res) => {
     console.log("here11")
     const data = await docClient.get(userParams).promise();
     if(data.Item==null){
-      res.json({error:"User not found"});
+      res.status(400).json({ errorMessage: 'User not found' });
       return;
     }
     else{
@@ -251,7 +260,7 @@ const sendInvite = async (req, res) => {
         console.log(isAlreadyInvited)
 
         if(isAlreadyInvited){
-          res.json({error:"User already invited"});
+          res.status(400).json({ errorMessage: 'User already invited' });
           return;
         }
       }
@@ -278,8 +287,8 @@ const sendInvite = async (req, res) => {
       console.log("succesfullky updated user")
      }
      catch (putErr) {
-       console.error('Error creating item user:', putErr);
-       res.json({ error: putErr });
+      res.status(400).json({ errorMessage: 'Error creating user item' });
+      res.json({ error: putErr });
      }
      console.log("here13")
 
@@ -292,15 +301,14 @@ const sendInvite = async (req, res) => {
       responseObj={...responseObj,groupRes:groupRespone}
       res.json({success: 'everything good', data : responseObj});
     } catch (putErr) {
-      console.error('Error creating item group:', putErr);
+      res.status(400).json({ errorMessage: 'Error creating group item' });
       res.json({ error: putErr });
     }
     console.log("here14")
 
 
   } catch (err) {
-    console.error('Error adding refresh:', err);
-    res.json({ error: err });
+    res.status(400).json({ errorMessage: 'User not found' });
   }
 };
 
@@ -322,7 +330,7 @@ const toggleInvite = async (req, res) => {
   try {
     const groupData = await docClient.get(groupParams).promise();
     if (groupData.Item == null) {
-      res.json({ error: "Group not found" });
+      res.status(400).json({ errorMessage: 'Group not found' });
       return;
     } 
 
@@ -334,13 +342,13 @@ const toggleInvite = async (req, res) => {
     try {
       const userData = await docClient.get(userParams).promise();
       if (userData.Item == null) {
-        res.json({ error: "User not found" });
+        res.status(400).json({ errorMessage: 'User not found' });
         return;
       } else {
         // Remove groupId from user's groups attribute
         const userHasInvite = userData.Item.invites.some(invite => invite.groupId === groupId);
         if (!userHasInvite) {
-          res.json({ error: "User doesn't have invite" });
+          res.status(400).json({ errorMessage: 'User does not have invite' });
           return;
         } 
         const updatedGroups = userData.Item.invites.filter(invite => invite.groupId !== groupId);
@@ -373,7 +381,7 @@ const toggleInvite = async (req, res) => {
           }
           
         } catch (deleteErr) {
-          console.error('Error removing invite:', deleteErr);
+          res.status(400).json({ errorMessage: 'Error removing invite' });
           res.json({ error: deleteErr });
           return;
         }
@@ -406,7 +414,7 @@ const toggleInvite = async (req, res) => {
             res.json({ success: 'invite accepted successfully' });
 
           } catch (deleteErr) {
-            console.error('Error accep invite:', deleteErr);
+            res.status(400).json({ errorMessage: 'Error accepting invite' });
             res.json({ error: deleteErr });
 
           }
@@ -414,12 +422,12 @@ const toggleInvite = async (req, res) => {
         
       }
     } catch (getUserErr) {
-      console.error('Error getting user data:', getUserErr);
+      res.status(400).json({ errorMessage: 'Cant get user data' });
       res.json({ error: getUserErr });
     }
 
   } catch (err) {
-    console.error('Error getting group data:', err);
+    res.status(400).json({ errorMessage: 'Cant get group data' });
     res.json({ error: err });
   }
 };
@@ -443,7 +451,7 @@ const leaveGroup = async (req, res) => {
   try {
     const groupData = await docClient.get(groupParams).promise();
     if (groupData.Item == null) {
-      res.json({ error: "Group not found" });
+      res.status(400).json({ errorMessage: 'Group not found' });
       return;
     } 
     else{
@@ -458,12 +466,12 @@ const leaveGroup = async (req, res) => {
     try {
       const userData = await docClient.get(userParams).promise();
       if (userData.Item == null) {
-        res.json({ error: "User not found" });
+        res.status(400).json({ errorMessage: 'User not found' });
         return;
       } else {
         const userInGroup = groupData.Item.usersList.some(user => user.Item.username === username);
         if(!userInGroup){
-          res.json({ error: "user not in group" });
+          res.status(400).json({ errorMessage: 'User not in group' });
           return;
   
         }
@@ -521,18 +529,16 @@ const leaveGroup = async (req, res) => {
 
           res.json({ success: 'user succesfully left successfully' });
         } catch (deleteErr) {
-          console.error('Error leaving group:', deleteErr);
-          res.json({ error: deleteErr });
+          res.status(400).json({ errorMessage: deleteErr });
         }
       }
     } catch (getUserErr) {
-      console.error('Error getting user data:', getUserErr);
-      res.json({ error: getUserErr });
+      res.status(400).json({ errorMessage:getUserErr });
     }
 
   } catch (err) {
-    console.error('Error getting group data:', err);
-    res.json({ error: err });
+    res.status(400).json({ errorMessage:err });
+
   }
 };
 
@@ -550,12 +556,12 @@ const changeHost = async (req, res) => {
   try {
     const groupData = await docClient.get(groupParams).promise();
     if (groupData.Item == null) {
-      res.json({ error: "Group not found" });
+      res.status(400).json({ errorMessage:'Group not found' });
       return;
     } else {
       console.log(groupData.Item.host.Item.username)
       if (groupData.Item.host.Item.username !== currHost) {
-        res.json({ error: "Not the host" });
+        res.status(400).json({ errorMessage:'not the host' });
         return;
       }
     }
@@ -568,7 +574,7 @@ const changeHost = async (req, res) => {
     try {
       const userData = await docClient.get(userParams).promise();
       if (userData.Item == null) {
-        res.json({ error: "User not found" });
+        res.status(400).json({ errorMessage:'User not found' });
         return;
       } else {
         // Remove groupId from user's groups attribute
@@ -588,19 +594,40 @@ const changeHost = async (req, res) => {
           res.json({ success: 'host changed successfully' });
         } catch (deleteErr) {
           console.error('Error changing host:', deleteErr);
-          res.json({ error: deleteErr });
+          res.status(400).json({ errorMessage:deleteErr});
         }
       }
     } catch (getUserErr) {
-      console.error('Error getting user data:', getUserErr);
-      res.json({ error: getUserErr });
+      res.status(400).json({ errorMessage:getUserErr });
     }
 
   } catch (err) {
-    console.error('Error getting group data:', err);
-    res.json({ error: err });
+    res.status(400).json({ errorMessage:err });
   }
 };
 
+const getGroup=async(req,res)=>{
+  const  groupId  = req.query.groupId;
 
-module.exports = { newGroup, deleteGroup,sendInvite, toggleInvite, leaveGroup, changeHost,test};
+  const userParams = {
+    TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': groupId },
+  };
+
+  try {
+    const data = await docClient.get(userParams).promise();
+    if(data.Item==null){
+      res.status(400).json({ errorMessage:'Group not found' });
+      return;
+    }
+    else{
+      res.json({group:data.Item})
+    }
+  }
+    catch(error){
+      console.log("error",error);
+    }
+}
+
+
+module.exports = { newGroup, deleteGroup,sendInvite, toggleInvite, leaveGroup, changeHost,test,getGroup};

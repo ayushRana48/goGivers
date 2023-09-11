@@ -27,14 +27,13 @@ const ConfirmScreen = ({navigation}:any) => {
       const response = await Auth.confirmSignUp(username, confirmation)
       console.log(response)
 
-      await API.post('usersAPI', '/users/newUser', {
+      await API.post('goGivers', '/goGivers/users/newUser', {
         body:{
           "username":username,
           "email":email
         },
         response:true
       })
-      
       .then((response) => {
         console.log(response)
         setUser(username);

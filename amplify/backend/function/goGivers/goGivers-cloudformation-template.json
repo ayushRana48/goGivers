@@ -47,12 +47,12 @@
         "FunctionName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "getUsers",
+            "goGivers",
             {
               "Fn::Join": [
                 "",
                 [
-                  "getUsers",
+                  "goGivers",
                   "-",
                   {
                     "Ref": "env"
@@ -89,12 +89,12 @@
         "RoleName": {
           "Fn::If": [
             "ShouldNotCreateEnvResources",
-            "authtutLambdaRole55bf2202",
+            "gogiversLambdaRolea211643d",
             {
               "Fn::Join": [
                 "",
                 [
-                  "authtutLambdaRole55bf2202",
+                  "gogiversLambdaRolea211643d",
                   "-",
                   {
                     "Ref": "env"

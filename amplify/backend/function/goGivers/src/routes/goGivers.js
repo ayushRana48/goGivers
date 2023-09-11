@@ -11,11 +11,14 @@ router.put('/groups/sendInvite', groupController.sendInvite);
 router.put('/groups/toggleInvite', groupController.toggleInvite);
 router.put('/groups/leaveGroup', groupController.leaveGroup);
 router.put('/groups/changeHost', groupController.changeHost);
+router.get('/groups/getGroup', groupController.getGroup);
 
-router.post('/newUser', userController.newUser);
-router.put('/addStravaRefresh', userController.addStravaRefresh);
-router.post('/reauthorizeStrava', userController.reauthorizeStrava);
-router.put('/test', userController.test2);
+router.post('/users/newUser', userController.newUser);
+router.put('/users/addStravaRefresh', userController.addStravaRefresh);
+router.post('/users/reauthorizeStrava', userController.reauthorizeStrava);
+router.put('/users/test', userController.test2);
+router.get('/users/getUser', userController.getUser);
+
 
 
 module.exports = router;

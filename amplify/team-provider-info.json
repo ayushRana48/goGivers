@@ -21,15 +21,15 @@
       "auth": {
         "GoGivers": {}
       },
-      "function": {
-        "getUsers": {
-          "deploymentBucketName": "amplify-authtut-staging-51032-deployment",
-          "s3Key": "amplify-builds/getUsers-594b794354644255774d-build.zip"
-        }
-      },
       "api": {
         "AuthTut": {},
-        "usersAPI": {}
+        "goGivers": {}
+      },
+      "function": {
+        "goGivers": {
+          "deploymentBucketName": "amplify-authtut-staging-51032-deployment",
+          "s3Key": "amplify-builds/goGivers-465049306d494e63376a-build.zip"
+        }
       }
     }
   }

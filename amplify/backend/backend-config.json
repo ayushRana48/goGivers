@@ -21,7 +21,7 @@
       "providerPlugin": "awscloudformation",
       "service": "AppSync"
     },
-    "usersAPI": {
+    "goGivers": {
       "dependsOn": [
         {
           "attributes": [
@@ -29,7 +29,7 @@
             "Arn"
           ],
           "category": "function",
-          "resourceName": "getUsers"
+          "resourceName": "goGivers"
         }
       ],
       "providerPlugin": "awscloudformation",
@@ -64,7 +64,7 @@
     }
   },
   "function": {
-    "getUsers": {
+    "goGivers": {
       "build": true,
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
@@ -77,19 +77,19 @@
     }
   },
   "parameters": {
-    "AMPLIFY_function_getUsers_deploymentBucketName": {
+    "AMPLIFY_function_goGivers_deploymentBucketName": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "getUsers"
+          "resourceName": "goGivers"
         }
       ]
     },
-    "AMPLIFY_function_getUsers_s3Key": {
+    "AMPLIFY_function_goGivers_s3Key": {
       "usedBy": [
         {
           "category": "function",
-          "resourceName": "getUsers"
+          "resourceName": "goGivers"
         }
       ]
     },

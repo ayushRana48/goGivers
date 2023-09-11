@@ -30,7 +30,7 @@ const AWS= require('aws-sdk')
 AWS.config.update({ region: 'us-west-1' }); // Replace 'your-aws-region' with the desired AWS region, e.g., 'us-east-1'.
 
 
-app.use('/users', require('./routes/users'));
+app.use('/goGivers', require('./routes/goGivers'));
 
 
 app.listen(3000, function() {

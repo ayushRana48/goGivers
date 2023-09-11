@@ -44,7 +44,7 @@ const Profile = ({navigation}:any) => {
       console.log(authState.scopes)
       if(authState.scopes[0].includes("activity:read_all") && authState.refreshToken!=null){
         setMissingScope(false)
-        await API.put('usersAPI', '/users/addStravaRefresh', {
+        await API.put('goGivers', '/goGivers/users/addStravaRefresh', {
           body:{
             "username":username,
             "refresh":authState.refreshToken

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer,DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import SignInScreen from './screens/AuthScreens/SignInScreen/SignInScreen';
@@ -12,17 +12,23 @@ import { UserProvider } from '../UserContext';
 
 export default function Nav() {
     const Stack = createNativeStackNavigator();
-
+  
+const MyTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: 'white'
+  },
+};
   return (
-    <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-      
-                <Stack.Screen name = "SignIn" component={SignInScreen}/>
-                <Stack.Screen name = "SignUp" component={SignUpScreen}/>
-                <Stack.Screen name = "ForgotPassword" component={ResetScreen}/>
-                <Stack.Screen name = "ConfirmEmail" component={ConfirmScreen}/>
-                <Stack.Screen name = "MainNav" component={MainNav}/>
-            </Stack.Navigator>
+    <NavigationContainer theme={MyTheme}>
+        <Stack.Navigator screenOptions={{ headerShown: false } }>
+            <Stack.Screen name = "SignIn" component={SignInScreen}/>
+            <Stack.Screen name = "SignUp" component={SignUpScreen}/>
+            <Stack.Screen name = "ForgotPassword" component={ResetScreen}/>
+            <Stack.Screen name = "ConfirmEmail" component={ConfirmScreen}/>
+            <Stack.Screen name = "MainNav" component={MainNav}/>
+        </Stack.Navigator>
     </NavigationContainer>
   );
 }
