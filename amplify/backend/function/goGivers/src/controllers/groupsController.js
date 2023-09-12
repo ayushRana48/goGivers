@@ -42,25 +42,24 @@ const newGroup = async (req, res) => {
     const groupId = groupName + ' #' + randomSequence
 
     const hostUser = {
-      username: data.Item.username,
+      username: data.Item.username.toLowerCase(),
       Id: data.Item.id,
       mileage: 0,
       moneyRaised: 0,
       strikes: 0,
-      charity: data.Item.charity,
       stravaRefresh: data.Item.stravaRefresh,
     };
 
     const params = {
       TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
       Item: {
-        host: data.Item,
+        host: hostUser,
         groupName: groupName,
         moneyMile:moneyMile,
         minMile:minMile,
         minDays:minDays,
         id: groupId,
-        usersList: [data.Item],
+        usersList: [hostUser],
         __typename: "GroupsModel",
         createdAt: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         updatedAt: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
@@ -73,7 +72,7 @@ const newGroup = async (req, res) => {
 
     const updateUserParams = {
       TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
-      Key: { 'id': username },
+      Key: { 'id': username.toLowerCase() },
       UpdateExpression: 'SET #groups = :groups',
       ExpressionAttributeNames: { '#groups': 'groups' },
       ExpressionAttributeValues: { ':groups': updatedGroups },
@@ -114,10 +113,13 @@ const deleteGroup = async (req, res) => {
   try {
     const groupData = await docClient.get(groupParams).promise();
     if (groupData.Item == null) {
+      console.log("here1")
       res.status(400).json({ errorMessage: 'Group Not found' });
       return;
     } else {
-      if (groupData.Item.host.Item.username !== username) {
+      console.log("her21")
+
+      if (groupData.Item.host.username.toLowerCase() !== username.toLowerCase()) {
         res.status(400).json({ errorMessage: 'Not the host' });
         return;
       }
@@ -125,11 +127,13 @@ const deleteGroup = async (req, res) => {
 
     const userParams = {
       TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
-      Key: { 'id': username },
+      Key: { 'id': username.toLowerCase() },
     };
 
     try {
       const userData = await docClient.get(userParams).promise();
+      console.log(userData)
+
       if (userData.Item == null) {
         res.status(400).json({ errorMessage: 'User not found' });
         return;
@@ -139,7 +143,7 @@ const deleteGroup = async (req, res) => {
 
         const updateUserParams = {
           TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
-          Key: { 'id': username },
+          Key: { 'id': username.toLowerCase() },
           UpdateExpression: 'SET #groups = :groups',
           ExpressionAttributeNames: { '#groups': 'groups' },
           ExpressionAttributeValues: { ':groups': updatedGroups },
@@ -168,7 +172,6 @@ const deleteGroup = async (req, res) => {
 
   } catch (err) {
     res.status(400).json({ errorMessage: 'Cant get group data' });
-    res.json({ error: err });
   }
 };
 
@@ -207,18 +210,23 @@ const sendInvite = async (req, res) => {
     console.log(groupData)
 
     if (groupData.Item == null) {
+      console.log("DSd")
       res.status(400).json({ errorMessage: 'Group not found' });
       return;
     } else {
-      const userInGroup = groupData.Item.usersList.some(user => user.Item.username == username);
-      const senderInGroup = groupData.Item.usersList.some(user => user.Item.username == sender);
+            console.log("DSdd")
+
+      const userInGroup = groupData.Item.usersList.some(user => user.username == username);
+      const senderInGroup = groupData.Item.usersList.some(user => user.username == sender);
+      console.log("DSdds")
+
       if (userInGroup) {
         res.status(400).json({ errorMessage: 'User already in group' });
         return;
       }
       console.log(groupData.Item.usersList[0].username===sender)
       console.log(groupData.Item.usersList[0].username)
-      console.log(groupData.Item.usersList[0].Item.username)
+      console.log(groupData.Item.usersList[0].username)
 
       if (!senderInGroup) {
         res.status(400).json({ errorMessage: 'Sender not in group' });
@@ -228,6 +236,7 @@ const sendInvite = async (req, res) => {
 
     const updatedGroups = groupData.Item.invites ? [...groupData.Item.invites, username] : [username];
 
+    console.log(updatedGroups)
     updateGroupParams = {
       TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
       Key: { 'id': groupId },
@@ -241,6 +250,7 @@ const sendInvite = async (req, res) => {
     
   }catch(error){
     res.status(400).json({ errorMessage: 'Unkown error' });
+    return;
   }
 
 
@@ -288,7 +298,6 @@ const sendInvite = async (req, res) => {
      }
      catch (putErr) {
       res.status(400).json({ errorMessage: 'Error creating user item' });
-      res.json({ error: putErr });
      }
      console.log("here13")
 
@@ -302,7 +311,6 @@ const sendInvite = async (req, res) => {
       res.json({success: 'everything good', data : responseObj});
     } catch (putErr) {
       res.status(400).json({ errorMessage: 'Error creating group item' });
-      res.json({ error: putErr });
     }
     console.log("here14")
 
@@ -388,7 +396,17 @@ const toggleInvite = async (req, res) => {
 
         //if accept is true add the user to userslist
         if(accept){
-          const updateUsersList = groupData.Item.usersList ? [...groupData.Item.usersList, userData] : [userData];
+          ///sf
+
+          const newUser = {
+            username: userData.Item.username,
+            Id: userData.Item.id,
+            mileage: 0,
+            moneyRaised: 0,
+            strikes: 0,
+            stravaRefresh: userData.Item.stravaRefresh,
+          };
+          const updateUsersList = groupData.Item.usersList ? [...groupData.Item.usersList, newUser] : [newUser];
           const updateGroupsList = userData.Item.groups ? [...userData.Item.groups, groupId] : [groupId];
 
 
@@ -442,6 +460,7 @@ const toggleInvite = async (req, res) => {
 
 const leaveGroup = async (req, res) => {
   const { username, groupId } = req.body;
+  console.log("hrere1")
 
   const groupParams = {
     TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
@@ -450,11 +469,19 @@ const leaveGroup = async (req, res) => {
 
   try {
     const groupData = await docClient.get(groupParams).promise();
+    console.log("hrerw21")
     if (groupData.Item == null) {
+      console.log("hrere2")
+
       res.status(400).json({ errorMessage: 'Group not found' });
       return;
     } 
     else{
+      if(groupData.Item.usersList.length<=1){
+        res.status(400).json({ errorMessage: 'Last Member left. Delete group instead' });
+        return;
+
+      }
      
     }
 
@@ -466,10 +493,15 @@ const leaveGroup = async (req, res) => {
     try {
       const userData = await docClient.get(userParams).promise();
       if (userData.Item == null) {
+        console.log("hrere")
         res.status(400).json({ errorMessage: 'User not found' });
         return;
       } else {
-        const userInGroup = groupData.Item.usersList.some(user => user.Item.username === username);
+        console.log(groupData.Item.usersList)
+        console.log("fsf")
+        const userInGroup = groupData.Item.usersList.some(user => (user.username === username || (user.Item &&  user?.Item.username===username)));
+        console.log(userInGroup)
+        console.log(":")
         if(!userInGroup){
           res.status(400).json({ errorMessage: 'User not in group' });
           return;
@@ -477,6 +509,7 @@ const leaveGroup = async (req, res) => {
         }
         // Remove groupId from user's groups attribute
         const updatedGroups = userData.Item.groups.filter(id => id !== groupId);
+        console.log("here33")
 
         const updateUserParams = {
           TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
@@ -487,7 +520,9 @@ const leaveGroup = async (req, res) => {
         };
 
         // Delete the group
-        const updatedUsersList = groupData.Item.usersList.filter(user => user.Item.username !== username);
+        const updatedUsersList = groupData.Item.usersList.filter(user => user.username !== username);
+        console.log("here33")
+        console.log(updatedUsersList)
 
         const updateGroupParams = {
           TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
@@ -503,8 +538,9 @@ const leaveGroup = async (req, res) => {
         try {
           await docClient.update(updateUserParams).promise();
           await docClient.update(updateGroupParams).promise();
+          console.log("here33d")
 
-          if(groupData.Item.host.Item.username ===username){
+          if(groupData.Item.host.username ===username){
             let newHost;
             if(groupData.Item.usersList[0].username !== username){
               newHost=groupData.Item.usersList[0];
@@ -529,15 +565,15 @@ const leaveGroup = async (req, res) => {
 
           res.json({ success: 'user succesfully left successfully' });
         } catch (deleteErr) {
-          res.status(400).json({ errorMessage: deleteErr });
+          res.status(400).json({ errorMessage: "deleteErr" });
         }
       }
     } catch (getUserErr) {
-      res.status(400).json({ errorMessage:getUserErr });
+      res.status(400).json({ errorMessage:"getUserErr" });
     }
 
   } catch (err) {
-    res.status(400).json({ errorMessage:err });
+    res.status(400).json({ errorMessage:"err" });
 
   }
 };
@@ -559,11 +595,17 @@ const changeHost = async (req, res) => {
       res.status(400).json({ errorMessage:'Group not found' });
       return;
     } else {
-      console.log(groupData.Item.host.Item.username)
-      if (groupData.Item.host.Item.username !== currHost) {
+      console.log(groupData.Item.host)
+      if (groupData.Item.host.username !== currHost) {
         res.status(400).json({ errorMessage:'not the host' });
         return;
       }
+      if(!groupData.Item.usersList.some(user => user.username == username)){
+        res.status(400).json({ errorMessage:'user not in group' });
+        return;
+
+      }
+      
     }
 
     const userParams = {
@@ -573,6 +615,15 @@ const changeHost = async (req, res) => {
 
     try {
       const userData = await docClient.get(userParams).promise();
+      ////
+      const hostUser = {
+        username: userData.Item.username.toLowerCase(),
+        Id: userData.Item.id,
+        mileage: 0,
+        moneyRaised: 0,
+        strikes: 0,
+        stravaRefresh: userData.Item.stravaRefresh,
+      };
       if (userData.Item == null) {
         res.status(400).json({ errorMessage:'User not found' });
         return;
@@ -584,7 +635,7 @@ const changeHost = async (req, res) => {
           Key: { 'id': groupId },
           UpdateExpression: 'SET #host = :host',
           ExpressionAttributeNames: { '#host': 'host' },
-          ExpressionAttributeValues: { ':host': userData },
+          ExpressionAttributeValues: { ':host': hostUser },
         };
 
 
@@ -630,4 +681,4 @@ const getGroup=async(req,res)=>{
 }
 
 
-module.exports = { newGroup, deleteGroup,sendInvite, toggleInvite, leaveGroup, changeHost,test,getGroup};
+module.exports = { newGroup, deleteGroup,sendInvite, toggleInvite, leaveGroup, changeHost,getGroup};

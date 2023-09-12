@@ -5,7 +5,8 @@
   "main": "index.js",
   "license": "Apache-2.0",
   "scripts": {
-    "start": "node index"
+    "start": "node index",
+    "dev": "nodemon index"
   },
   "dependencies": {
     "aws-sdk": "^2.1445.0",
@@ -15,6 +16,7 @@
     "moment": "^2.29.4"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.92"
+    "@types/aws-lambda": "^8.10.92",
+    "nodemon": "^3.0.1"
   }
 }

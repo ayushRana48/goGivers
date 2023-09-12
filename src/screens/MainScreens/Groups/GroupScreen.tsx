@@ -31,7 +31,8 @@ const GroupScreen =() => {
             const response = await API.get('goGivers', url, {
               response: true
             });
-            console.log(response.data.group.usersList[0].Item.username)
+            console.log("HEIJFLKdgdsfasdgkf")
+            console.log(response.data.group)
             setGroupInfo(response.data.group);
 
             
@@ -80,8 +81,8 @@ const GroupScreen =() => {
         ) : <>
                 <Text style={{fontSize:25, alignSelf:'center',marginVertical:15}}>Members</Text>
                 {groupInfo?.usersList.map((u) => (
-                //@ts-ignore
-                <MemberItem key={u.username} user={u.Item} navigation={useNavigation()}></MemberItem>
+                  //@ts-ignore
+                  <MemberItem key={u.username} user={u} navigation={useNavigation()}></MemberItem>
                 ))}
             </>
         }

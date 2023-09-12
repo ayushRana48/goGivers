@@ -38,7 +38,7 @@ const SignUpScreen = ({navigation}:any)=>{
     return(
         <View style={styles.root}>
             <Text style={{fontSize:60}}>Sign Up</Text>
-            <CustomInput value={username} setValue={setUsername} placeholder="Username" secureTextEntry={false}></CustomInput>
+            <CustomInput value={username.toLowerCase()} setValue={setUsername} placeholder="Username" secureTextEntry={false}></CustomInput>
             <CustomInput value={email} setValue={setEmail} placeholder="Email" secureTextEntry={false}></CustomInput>
             <CustomInput value={password} setValue={setPassword} placeholder="Password" secureTextEntry></CustomInput>
             <CustomInput value={repeatPassword} setValue={setRepeatPassword} placeholder="Repeat Password" secureTextEntry></CustomInput>

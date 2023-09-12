@@ -27,6 +27,7 @@ const MemberItem = ({ user, navigation }: { user: UserType; navigation: any })  
   useEffect(()=>{
     //@ts-ignore
     console.log(user);
+    console.log("LPOOKS")
   },[])
 
   if (textWidth > MAX_TEXT_WIDTH) {
@@ -48,7 +49,7 @@ const MemberItem = ({ user, navigation }: { user: UserType; navigation: any })  
       <Text style={{ fontSize, maxWidth: MAX_TEXT_WIDTH }} numberOfLines={1} ellipsizeMode="tail">
         {truncatedName}
       </Text>
-      <Strikes strikes={2}></Strikes>
+      <Strikes strikes={user.strikes}></Strikes>
     </Pressable> 
   );
 };

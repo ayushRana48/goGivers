@@ -55,7 +55,7 @@ const SignInScreen = ({navigation}:any)=>{
     return(
         <View style={styles.root}>
             <Image source={require("../../../../assets/images/logo.png")} style={styles.logo}></Image>
-            <CustomInput value={username} setValue={setUsername} placeholder="Username" secureTextEntry={false}></CustomInput>
+            <CustomInput value={username.toLowerCase()} setValue={setUsername} placeholder="Username" secureTextEntry={false}></CustomInput>
             <CustomInput value={password} setValue={setPassword} placeholder="Password" secureTextEntry ></CustomInput>
             <CustomButton onPress={onSignInPressed} text={loading? "Loading..." : "Sign in"} type="primary"></CustomButton>
             <CustomButton onPress={onForgotPassword} text={"Forgot Password"} type="tertiary"></CustomButton>

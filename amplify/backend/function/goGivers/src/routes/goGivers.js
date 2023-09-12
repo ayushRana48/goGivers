@@ -4,7 +4,6 @@ const userController = require('../controllers/usersController');
 
 const groupController = require('../controllers/groupsController');
 
-router.put('/groups/test', groupController.test);
 router.post('/groups/newGroup', groupController.newGroup);
 router.delete('/groups/deleteGroup', groupController.deleteGroup);
 router.put('/groups/sendInvite', groupController.sendInvite);
@@ -16,7 +15,6 @@ router.get('/groups/getGroup', groupController.getGroup);
 router.post('/users/newUser', userController.newUser);
 router.put('/users/addStravaRefresh', userController.addStravaRefresh);
 router.post('/users/reauthorizeStrava', userController.reauthorizeStrava);
-router.put('/users/test', userController.test2);
 router.get('/users/getUser', userController.getUser);
 
 

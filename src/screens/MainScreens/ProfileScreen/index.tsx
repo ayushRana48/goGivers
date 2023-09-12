@@ -41,12 +41,13 @@ const Profile = ({navigation}:any) => {
     try{
       const authState = await authorize(config);
       console.log(authState)
-      console.log(authState.scopes)
+      console.log(authState.refreshToken)
+      console.log(user);
       if(authState.scopes[0].includes("activity:read_all") && authState.refreshToken!=null){
         setMissingScope(false)
         await API.put('goGivers', '/goGivers/users/addStravaRefresh', {
           body:{
-            "username":username,
+            "username":user,
             "refresh":authState.refreshToken
           },
           response:true

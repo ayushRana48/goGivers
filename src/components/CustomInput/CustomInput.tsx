@@ -44,6 +44,7 @@ const CustomInput = (props: CustomInputProps) => {
   return (
     <View style={[styles.container, borderStyle(), props.width ? { width: props.width } : undefined]}>
       <TextInput
+        autoCapitalize='none'
         style={styles.input}
         value={props.value}
         onChangeText={onChangeText}

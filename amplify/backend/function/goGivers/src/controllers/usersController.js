@@ -17,7 +17,7 @@ const newUser = async (req, res) => {
   const params = {
     TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
     Item: {
-      username: username,
+      username: username.toLowerCase(),
       email: email,
       id: username,
       totalMileage: 0,
@@ -52,7 +52,7 @@ const addStravaRefresh = async(req,res)=>{
 
   const params = {
     TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
-    Key: { 'id': username },
+    Key: { 'id': username.toLowerCase() },
     UpdateExpression: 'set stravaRefresh = :refreshValue', // Update the 'stravaRefresh' attribute
     ExpressionAttributeValues: { // Define the ExpressionAttributeValues
       ':refreshValue': refresh // Set the value of the 'stravaRefresh' attribute to the 'refresh' variable
@@ -111,7 +111,7 @@ const getUser=async(req,res)=>{
 
   const userParams = {
     TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
-    Key: { 'id': username },
+    Key: { 'id': username.toLowerCase() },
   };
 
   try {
