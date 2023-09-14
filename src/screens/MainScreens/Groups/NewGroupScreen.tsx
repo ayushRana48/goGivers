@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {View, Text, Button, StyleSheet,Alert} from 'react-native';
+import {View, Text, Button, StyleSheet,Alert, Pressable, Image} from 'react-native';
 import CustomButton from '../../../components/CustomButton';
 import {useNavigation, NavigationContainerRef, NavigationProp} from '@react-navigation/native';
 import { useRoute } from "@react-navigation/native";
@@ -65,7 +65,11 @@ const NewGroupScreen = ({navigation}:any) => {
           },
         response:true
       })
-      .then((response) => console.log(response,"fsfsf"))
+      .then((response) => {
+        console.log(response.data.newGroup.id,"fsfsf")
+        navigation.navigate('GroupScreen', { groupId: response.data.newGroup.id });
+
+      })
       .catch((e) => {
         console.log("not working", e);
       });
