@@ -129,6 +129,25 @@ const getUser=async(req,res)=>{
     }
 }
 
+const getAllUsers = async (req, res) => {
+  const userParams = {
+    TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
+  };
+
+  try {
+    const data = await docClient.scan(userParams).promise();
+    if (!data.Items || data.Items.length === 0) {
+      res.status(404).json({ errorMessage: 'No users found' });
+    } else {
+      res.json({ users: data.Items });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ errorMessage: 'Internal server error' });
+  }
+};
 
 
-module.exports={test2,newUser,addStravaRefresh,reauthorizeStrava,getUser};
+
+
+module.exports={test2,newUser,addStravaRefresh,reauthorizeStrava,getUser,getAllUsers};

@@ -5,6 +5,7 @@ import GroupsListScreen from './GroupsListScreen';
 import NewGroupScreen from './NewGroupScreen';
 import GroupScreen from './GroupScreen'
 import GroupSettings from './GroupSettings';
+import InviteSearch from './components/InviteSearch';
 
 const GroupsNav = ({navigation}:any) => {
 
@@ -16,6 +17,8 @@ const GroupsNav = ({navigation}:any) => {
         <Stack.Screen name = "GroupScreen" component={GroupScreen}/>
         <Stack.Screen name = "NewGroup" component={NewGroupScreen}/>
         <Stack.Screen name = "GroupSettings" component={GroupSettings}/>
+        <Stack.Screen name = "InviteSearch" component={InviteSearch}/>
+
 
       </Stack.Navigator>
   );

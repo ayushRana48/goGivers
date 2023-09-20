@@ -49,9 +49,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
       console.log(response.data,"fsfsf")
       
     })
-    .catch((e) => {
-      console.log("not working", e);
-    });
+    .catch(error => Alert.alert(error.response.data.errorMessage))
   }
 
   function changeGroupInfo(attribute: keyof newGroupType, val: string) {
@@ -72,6 +70,22 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
     }
   };
 
+  useEffect(()=>{
+    async function getAllUsers() {
+        await API.get('goGivers', '/goGivers/users/getAllUsers', {
+          credentials: 'include',
+          response:true
+        })
+        .then((response) => {
+          console.log(response.data.users[0].id,"fsfsf")
+          
+        })
+        .catch(error => Alert.alert(error.response.data.errorMessage))
+      }
+    getAllUsers()
+    
+  },[])
+
 
 
   return (
@@ -79,7 +93,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
       <>
         <View style={{ marginTop: 0 }}>
           <View style={{ flexDirection: 'row', marginTop: 20 }}>
-            <Pressable style={{ marginTop: 0, marginLeft: 20 }} onPress={() => { navigation.goBack() }}>
+            <Pressable style={{ marginTop: 0, marginLeft: 0 }} onPress={() => { navigation.goBack() }}>
               <Text>Back</Text>
             </Pressable>
             {isHost && !isEdit &&
@@ -162,7 +176,8 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
                 </Pressable>
               </>
             ) : !isEdit && (
-              <Pressable onPress={() => setIsInvite(true)}>
+              <Pressable onPress={() => navigation.navigate('InviteSearch', { group: group }) 
+            }>
                 <Text style={{ color: 'blue' }}>Add Members</Text>
               </Pressable>
               

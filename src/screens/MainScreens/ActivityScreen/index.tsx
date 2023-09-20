@@ -7,6 +7,7 @@ import { Auth,API } from "aws-amplify";
 import { authorize } from 'react-native-app-auth';
 import { Linking } from 'react-native'
 import 'react-native-url-polyfill/auto'
+import Invites from './components/Invites';
 
 
 const Activity = ({navigation}:any) => {
@@ -15,6 +16,7 @@ const Activity = ({navigation}:any) => {
   return (
     <View style={{padding:40}}>
       <Text style={{fontSize: 24, alignSelf: 'center'}}>Activity</Text>
+      <Invites navigation={navigation}></Invites>
 
     </View>
   );

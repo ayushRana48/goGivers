@@ -16,6 +16,7 @@ router.post('/users/newUser', userController.newUser);
 router.put('/users/addStravaRefresh', userController.addStravaRefresh);
 router.post('/users/reauthorizeStrava', userController.reauthorizeStrava);
 router.get('/users/getUser', userController.getUser);
+router.get('/users/getAllUsers', userController.getAllUsers);
 
 
 
