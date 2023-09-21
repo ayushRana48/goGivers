@@ -8,7 +8,7 @@ import { authorize } from 'react-native-app-auth';
 import { Linking } from 'react-native';
 import 'react-native-url-polyfill/auto';
 
-const GroupItem = ({ groupName, navigation }: { groupName: string; navigation: any }) => {
+const GroupItem = ({ groupName ,navigation }: { groupName: string;navigation: any }) => {
   function toGroup() {
     navigation.navigate('GroupScreen', { groupId: groupName });
   }

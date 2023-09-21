@@ -23,9 +23,10 @@ const GroupsListScreen = ({navigation}:any) => {
 
 
   useEffect(() => {
+    console.log("FETTCHHh")
     const fetchData = async () => {
       try {
-        const url = `/goGivers/users/getUser?username=${user}`;
+        const url = `/goGivers/users/getUser?usegrname=${user}`;
         console.log(url);
         const response = await API.get('goGivers', url, {
           response: true
@@ -48,6 +49,12 @@ const GroupsListScreen = ({navigation}:any) => {
 
   const groupItemList = groups?.map(x=><GroupItem key={x} groupName={x} navigation={navigation}></GroupItem>)
   
+  function removeGroup(id:String){
+    const updatedGroup = groups?.filter(x => x !== id);
+
+    // Update the group object with the new usersList
+    setGroups(updatedGroup);
+  }
  
   return (
     <ScrollView>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, Alert, Pressable, Image } from 'react-native';
+import { View, Text, Button, StyleSheet, Alert, Pressable, Image,ScrollView } from 'react-native';
 import CustomButton from '../../../components/CustomButton';
 import { Auth, API } from "aws-amplify";
 import 'react-native-url-polyfill/auto'
@@ -7,6 +7,8 @@ import CustomInput from '../../../components/CustomInput/CustomInput';
 import { useUserContext } from '../../../../UserContext';
 import { GroupsModel } from '../../../types/types';
 import { useRoute } from '@react-navigation/native';
+import DatePicker from 'react-native-date-picker'
+import MemberSettings from './components/MemberSettings';
 
 const GroupSettings = ({ navigation }: { navigation: any }) => {
   const { user } = useUserContext();
@@ -18,41 +20,46 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
   const [invitee, setInvitee] = useState("");
   const [isInvite, setIsInvite] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [openDate, setOpenDate] = useState(false);
+  const [openMembers, setOpenMembers] = useState(false);
+
 
   type newGroupType = {
     groupName: string;
     minMile: number;
     minDays: number;
     moneyMile: number;
+    startDate: Date | undefined;
   };
 
-  const [editGroupInfo, setEditGroupInfo] = useState<newGroupType>({ groupName: group.groupName, minMile: group.minMile, minDays:group.minDays, moneyMile:group.minMile })
+  const [editGroupInfo, setEditGroupInfo] = useState<newGroupType>({ groupName: group.groupName, minMile: group.minMile, minDays: group.minDays, moneyMile: group.minMile, startDate: group.startDate })
 
   const isHost = (user == group.host.username)
 
+
+  //to reset after cancel
   useEffect(() => {
-    console.log('groip')
-    console.log(group);
-  }, [])
+    setEditGroupInfo({ groupName: group.groupName, minMile: group.minMile, minDays: group.minDays, moneyMile: group.minMile, startDate: group.startDate })
+  }, [isEdit])
 
   async function sendInvite() {
     await API.put('goGivers', '/goGivers/groups/sendInvite', {
       credentials: 'include',
-      body:{
-        "sender":user,
-        "username":invitee,
-        "groupId":group.id
-        },
-      response:true
+      body: {
+        "sender": user,
+        "username": invitee,
+        "groupId": group.id
+      },
+      response: true
     })
-    .then((response) => {
-      console.log(response.data,"fsfsf")
-      
-    })
-    .catch(error => Alert.alert(error.response.data.errorMessage))
+      .then((response) => {
+        console.log(response.data, "fsfsf")
+
+      })
+      .catch(error => Alert.alert(error.response.data.errorMessage))
   }
 
-  function changeGroupInfo(attribute: keyof newGroupType, val: string) {
+  function changeGroupInfo(attribute: keyof newGroupType, val: string | Date) {
     setEditGroupInfo((prevGroupInfo) => ({
       ...prevGroupInfo,
       [attribute]: val,
@@ -70,21 +77,127 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
     }
   };
 
-  useEffect(()=>{
+  function setHost(user: String) {
+    setIsEdit(false);
+    for (let i = 0; i < group.usersList.length; i++) {
+      if (group.usersList[i].username == user) {
+        console.log("new Host ", group.usersList[i])
+        setGroup({ ...group, host: group.usersList[i] })
+
+      }
+    }
+  }
+
+
+  function kickMember(userToKick: string) {
+    // Use the filter method to create a new array without the user to kick
+    const updatedUsersList = group.usersList.filter(user => user.username !== userToKick);
+
+    // Update the group object with the new usersList
+    setGroup({ ...group, usersList: updatedUsersList });
+  }
+
+
+  function open() {
+    if (group.usersList?.length == 0) {
+      return;
+    }
+
+    if (openMembers) {
+      setOpenMembers(false);
+    }
+
+    setOpenMembers(true);
+  }
+
+
+
+  //for search
+  useEffect(() => {
     async function getAllUsers() {
-        await API.get('goGivers', '/goGivers/users/getAllUsers', {
-          credentials: 'include',
-          response:true
-        })
+      await API.get('goGivers', '/goGivers/users/getAllUsers', {
+        credentials: 'include',
+        response: true
+      })
         .then((response) => {
-          console.log(response.data.users[0].id,"fsfsf")
-          
+          console.log(response.data.users[0].id, "fsfsf")
+
         })
         .catch(error => Alert.alert(error.response.data.errorMessage))
-      }
+    }
     getAllUsers()
-    
-  },[])
+
+  }, [])
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short', // 'short' or 'long' for abbreviated or full month name
+    day: '2-digit', // '2-digit' for zero-padded day
+  };
+
+  async function leaveGroup(username: String) {
+    console.log("LEAVEEEEEEEEEEE")
+    await API.put('goGivers', '/goGivers/groups/leaveGroup', {
+      credentials: 'include',
+      response: true,
+      body: {
+        "username": username,
+        "groupId": group.id
+      }
+    })
+    .then((response) => {
+      console.log(response.data, "fsfsf")
+      navigation.navigate('GroupList')
+
+    })
+    .catch(error => Alert.alert(error.response.data.errorMessage))
+  }
+
+  async function deleteGroup() {
+    console.log("DELEETEE")
+    await API.del('goGivers', '/goGivers/groups/deleteGroup', {
+      credentials: 'include',
+      response: true,
+      body: {
+        "username": user,
+        "groupId": group.id
+      }
+    })
+      .then((response) => {
+        console.log(response)
+        navigation.navigate('GroupList')
+
+      })
+      .catch(error => Alert.alert(error.response.data.errorMessage))
+  }
+
+
+
+  async function save() {
+    setIsEdit(false)
+
+    setGroup({ ...group, groupName: editGroupInfo.groupName, minMile: editGroupInfo.minMile, minDays: editGroupInfo.minDays, moneyMile: editGroupInfo.moneyMile, startDate: editGroupInfo.startDate })
+    console.log("SAVVVEEEEE")
+    await API.put('goGivers', '/goGivers/groups/editGroup', {
+      credentials: 'include',
+      response: true,
+      body: {
+        "username": user,
+        "groupId": group.id,
+        "minMile": editGroupInfo.minMile,
+        "moneyMile": editGroupInfo.moneyMile,
+        "startDate": editGroupInfo.startDate,
+        "minDays": editGroupInfo.minDays
+      }
+    })
+
+      .then((response) => {
+        console.log(response.data.users[0].id, "fsfsf")
+
+      })
+      .catch(error => Alert.alert(error.response.data.errorMessage))
+  }
+
 
 
 
@@ -113,9 +226,31 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
           </View>
         </View>
         <View style={{ marginTop: 30, marginLeft: 10 }}>
-          {isEdit ?
+          {isEdit && group.host.username==user?
             <>
               <View>
+                <View style={{ flexDirection: 'row', marginTop: 30 }}>
+                  <Text style={{}}>Members </Text>
+                  <Pressable style={{ marginLeft: 'auto' }} onPress={open}><Text>{group.usersList.length ? group.usersList.length : 0}</Text></Pressable>
+                </View>
+                {openMembers && (
+                  <ScrollView>
+                    {group.usersList.map(x => (
+                      <MemberSettings
+                        user={x}
+                        groupId={group.id}
+                        host={group.host.username}
+                        navigation={navigation}
+                        setHost={setHost}
+                        kickMember={kickMember}
+                      />
+                    ))}
+                  </ScrollView>
+                )}
+
+                <View style={{ height: 1.5, backgroundColor: '#d4d2d2', width: '100%', marginVertical: 5 }}></View>
+
+
                 <View style={{ flexDirection: 'row' }}>
                   <CustomInput placeholder='12' width={250} value={editGroupInfo.minMile.toString()} setValue={(value) => changeGroupInfo('minMile', value)} hideBorder="right" secureTextEntry={false} numeric></CustomInput>
                   <View style={{ borderWidth: 1, borderLeftWidth: 0, height: 32, borderRadius: 5, borderColor: '#cccccc', paddingHorizontal: 5, backgroundColor: 'white', marginTop: 10, marginLeft: -15, width: 50 }}>
@@ -133,17 +268,46 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
                 </View>
                 <Text style={{ marginLeft: 10, marginTop: -10, fontSize: 12 }}>Minimum Days Per Week</Text>
               </View>
+
               <View>
                 <View style={{ flexDirection: 'row' }}>
                   <View style={{ borderWidth: 1, borderRightWidth: 0, height: 32, borderRadius: 5, borderColor: '#cccccc', paddingHorizontal: 5, backgroundColor: 'white', marginTop: 10, width: 20, marginRight: -6 }}>
                     <Text style={{ marginTop: 6 }}>$</Text>
                   </View>
-                  <CustomInput placeholder='0.50' width={270} value={editGroupInfo.moneyMile.toString()} setValue={(value) => changeGroupInfo('moneyMile', value)} hideBorder="left" secureTextEntry={false} numeric decimal></CustomInput>
+                  <CustomInput placeholder='12' width={270} value={editGroupInfo.moneyMile.toString()} setValue={(value) => changeGroupInfo('moneyMile', value)} hideBorder="left" secureTextEntry={false} numeric></CustomInput>
                 </View>
                 <Text style={{ marginLeft: 10, marginTop: -10, fontSize: 12 }}>Dollars per Mile</Text>
               </View>
-              <View style={{ marginTop: 20}}></View>
-              <CustomButton text='Save' type='primary' onPress={() => setIsEdit(false)}></CustomButton>
+
+              <View style={{ marginTop: 20, marginLeft: 10 }}>
+                <Pressable onPress={() => setOpenDate(true)}>
+                  <Text style={{ marginLeft: 0, fontSize: 18 }}>
+                    {editGroupInfo.startDate
+                      ? new Date(editGroupInfo.startDate)?.toLocaleDateString('en-US', options)
+                      : "no start Date"}
+                  </Text>
+                </Pressable>
+                <Text style={{ marginLeft: 0, fontSize: 12 }}>Start Date</Text>
+
+              </View>
+              <DatePicker
+                modal
+                mode="date"
+                minimumDate={new Date()}
+                open={openDate}
+                date={new Date()}
+                onConfirm={(date) => {
+                  setOpenDate(false)
+                  changeGroupInfo("startDate", date)
+                }}
+                onCancel={() => {
+                  setOpenDate(false)
+                }}
+              />
+
+
+              <View style={{ marginTop: 20 }}></View>
+              <CustomButton text='Save' type='primary' onPress={save}></CustomButton>
               <Pressable style={{ marginTop: 20, marginLeft: 'auto', marginRight: 'auto' }} onPress={() => { setIsEdit(false) }}>
                 <Text>Cancel</Text>
               </Pressable>
@@ -155,12 +319,15 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
               <View style={{ height: 1.5, backgroundColor: '#d4d2d2', width: '100%', marginVertical: 5 }}></View>
               <Text style={{ fontSize: 18 }}>Minimum Days per Week : {group.minDays || 0}</Text>
               <View style={{ height: 1.5, backgroundColor: '#d4d2d2', width: '100%', marginVertical: 5 }}></View>
-              <Text style={{ fontSize: 18 }}>Next Check: {group?.startDate ? group.startDate.toString() : "No start date available"}</Text>
+              <Text style={{ fontSize: 18 }}>Dollars per Mile : ${group.moneyMile || 0}</Text>
+              <View style={{ height: 1.5, backgroundColor: '#d4d2d2', width: '100%', marginVertical: 5 }}></View>
+              <Text style={{ fontSize: 18 }}>Start Date: {group?.startDate ? new Date(group.startDate)?.toLocaleDateString('en-US', options) : "No start date available"}</Text>
+
             </>
           }
         </View>
         <View>
-          <View style={{marginTop:40,alignItems:'center'}}>
+          <View style={{ marginTop: 40, alignItems: 'center' }}>
             {isInvite && !isEdit ? (
               <>
                 <CustomInput
@@ -176,11 +343,19 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
                 </Pressable>
               </>
             ) : !isEdit && (
-              <Pressable onPress={() => navigation.navigate('InviteSearch', { group: group }) 
-            }>
+              <><Pressable onPress={() => navigation.navigate('InviteSearch', { group: group })}>
                 <Text style={{ color: 'blue' }}>Add Members</Text>
+
               </Pressable>
-              
+                <View style={{ marginBottom: 30 }}></View>
+                {group.usersList.length <= 1 ?
+                  <CustomButton text='Delete Group' type='primary' bgColor='red' onPress={deleteGroup} />
+                  :
+                  <CustomButton text='Leave Group' type='primary' bgColor='red' onPress={() => leaveGroup(user)} />
+
+                }
+              </>
+
             )}
           </View>
         </View>

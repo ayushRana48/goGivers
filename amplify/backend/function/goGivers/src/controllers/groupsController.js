@@ -680,5 +680,88 @@ const getGroup=async(req,res)=>{
     }
 }
 
+const editGroup = async (req, res) => {
+  const { username, groupId, startDate, minMile, minDays, groupName, moneyMile } = req.body;
 
-module.exports = { newGroup, deleteGroup,sendInvite, toggleInvite, leaveGroup, changeHost,getGroup};
+  const groupParams = {
+    TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': groupId },
+  };
+
+  try {
+    const groupData = await docClient.get(groupParams).promise();
+
+    if (groupData.Item == null) {
+      res.status(400).json({ errorMessage: 'Group not found' });
+      return;
+    }
+
+    // Check if the provided username is the host of the group
+    if (groupData.Item.host.username !== username) {
+      res.status(400).json({ errorMessage: 'You are not the host of this group' });
+      return;
+    }
+
+    // Prepare an update expression based on the provided attributes
+    let updateExpression = 'SET ';
+    const expressionAttributeValues = {};
+
+    if (startDate !== undefined) {
+      // const dateRegex = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{2} \d{4}$/; // Regular expression to match "Mon DD YYYY" format
+
+      updateExpression += 'startDate = :startDate, ';
+      expressionAttributeValues[':startDate'] = startDate;
+    }
+
+    if (minMile !== undefined) {
+      updateExpression += 'minMile = :minMile, ';
+      expressionAttributeValues[':minMile'] = minMile;
+    }
+
+    if (moneyMile !== undefined) {
+      updateExpression += 'moneyMile = :moneyMile, ';
+      expressionAttributeValues[':moneyMile'] = moneyMile;
+    }
+
+    if (minDays !== undefined) {
+      updateExpression += 'minDays = :minDays, ';
+      expressionAttributeValues[':minDays'] = minDays;
+    }
+
+    if (groupName !== undefined) {
+      updateExpression += 'groupName = :groupName, ';
+      expressionAttributeValues[':groupName'] = groupName;
+    }
+
+    // Remove the trailing comma and space
+    updateExpression = updateExpression.slice(0, -2);
+
+    // Update the group attributes if any were provided
+    if (updateExpression !== 'SET ') {
+      const updateGroupParams = {
+        TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
+        Key: { 'id': groupId },
+        UpdateExpression: updateExpression,
+        ExpressionAttributeValues: expressionAttributeValues,
+      };
+
+      try {
+        await docClient.update(updateGroupParams).promise();
+        res.json({ success: 'Group updated successfully' });
+      } catch (updateErr) {
+        console.error('Error updating group:', updateErr);
+        res.status(400).json({ errorMessage: updateErr });
+      }
+    } else {
+      res.json({ success: 'No changes made to the group' });
+    }
+  } catch (error) {
+    console.error('Error fetching group:', error);
+    res.status(400).json({ errorMessage: error });
+  }
+};
+
+
+module.exports = { newGroup, deleteGroup, sendInvite, toggleInvite, leaveGroup, changeHost, getGroup, editGroup };
+
+
