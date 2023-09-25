@@ -9,9 +9,12 @@ import { GroupsModel } from '../../../types/types';
 import { useRoute } from '@react-navigation/native';
 import DatePicker from 'react-native-date-picker'
 import MemberSettings from './components/MemberSettings';
+import { useGroupsContext } from './GroupsContext';
 
 const GroupSettings = ({ navigation }: { navigation: any }) => {
   const { user } = useUserContext();
+  const {groupsData,setGroupsData}= useGroupsContext();
+
 
   //@ts-ignore
   const route = useRoute<{ params: { group: GroupsModel } }>();
@@ -137,6 +140,8 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
 
   async function leaveGroup(username: String) {
     console.log("LEAVEEEEEEEEEEE")
+    const newList = groupsData.filter((x: string)=>x!=group.id)
+    
     await API.put('goGivers', '/goGivers/groups/leaveGroup', {
       credentials: 'include',
       response: true,
@@ -148,6 +153,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
     .then((response) => {
       console.log(response.data, "fsfsf")
       navigation.navigate('GroupList')
+      setGroupsData(newList);
 
     })
     .catch(error => Alert.alert(error.response.data.errorMessage))
@@ -155,6 +161,8 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
 
   async function deleteGroup() {
     console.log("DELEETEE")
+    const newList = groupsData.filter((x: string)=>x!=group.id)
+
     await API.del('goGivers', '/goGivers/groups/deleteGroup', {
       credentials: 'include',
       response: true,
@@ -166,6 +174,8 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
       .then((response) => {
         console.log(response)
         navigation.navigate('GroupList')
+        setGroupsData(newList);
+
 
       })
       .catch(error => Alert.alert(error.response.data.errorMessage))

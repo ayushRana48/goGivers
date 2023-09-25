@@ -10,9 +10,11 @@ import 'react-native-url-polyfill/auto'
 import {GroupsModel} from '../../../types/types'
 import { useUserContext } from '../../../../UserContext';
 import GroupItem from './components/GroupItem'
+import {useGroupsContext } from './GroupsContext';
 
 const GroupsListScreen = ({navigation}:any) => {
   const {user } = useUserContext();
+  const {groupsData,setGroupsData}= useGroupsContext();
 
   function newGroup(){
     navigation.navigate('NewGroup');
@@ -26,7 +28,7 @@ const GroupsListScreen = ({navigation}:any) => {
     console.log("FETTCHHh")
     const fetchData = async () => {
       try {
-        const url = `/goGivers/users/getUser?usegrname=${user}`;
+        const url = `/goGivers/users/getUser?username=${user}`;
         console.log(url);
         const response = await API.get('goGivers', url, {
           response: true
@@ -35,8 +37,10 @@ const GroupsListScreen = ({navigation}:any) => {
         
         if (response.data.user.groups.length > 0) {
           setGroups(response.data.user.groups);
+          setGroupsData(response.data.user.groups);
         } else {
           setGroups([]);
+          setGroupsData([])
         }
       } catch (e) {
         console.log("can't get groups list", e);
@@ -49,12 +53,6 @@ const GroupsListScreen = ({navigation}:any) => {
 
   const groupItemList = groups?.map(x=><GroupItem key={x} groupName={x} navigation={navigation}></GroupItem>)
   
-  function removeGroup(id:String){
-    const updatedGroup = groups?.filter(x => x !== id);
-
-    // Update the group object with the new usersList
-    setGroups(updatedGroup);
-  }
  
   return (
     <ScrollView>
@@ -70,8 +68,8 @@ const GroupsListScreen = ({navigation}:any) => {
           <ActivityIndicator size="large" color="blue" />
         ) : (
           <>
-            {groups && groups?.length > 0 ? (
-              groups.map((groupName) => (
+            {groupsData && groupsData?.length > 0 ? (
+              groupsData.map((groupName:any) => (
                 <GroupItem key={groupName} groupName={groupName} navigation={navigation} />
               ))
             ) : (

@@ -9,6 +9,7 @@ import { Linking } from 'react-native'
 import 'react-native-url-polyfill/auto'
 import CustomInput from '../../../components/CustomInput/CustomInput';
 import { useUserContext } from '../../../../UserContext';
+import { useGroupsContext } from './GroupsContext';
 
 type newGroupType = {
     groupName: string;
@@ -20,6 +21,8 @@ type newGroupType = {
 
 const NewGroupScreen = ({navigation}:any) => {
     const {user } = useUserContext();
+    const {groupsData,setGroupsData}= useGroupsContext();
+
 
   const [groupInfo,setGroupInfo]= useState<newGroupType>({groupName:"",minMile:"",minDays:"",moneyMile:""})
   
@@ -67,6 +70,10 @@ const NewGroupScreen = ({navigation}:any) => {
       })
       .then((response) => {
         console.log(response.data.newGroup.id,"fsfsf")
+        const newList = [...groupsData];
+        newList.push(response.data.newGroup.id);
+                setGroupsData(newList)
+
         navigation.navigate('GroupScreen', { groupId: response.data.newGroup.id });
 
       })
