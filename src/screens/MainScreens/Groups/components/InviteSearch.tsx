@@ -28,9 +28,7 @@ const InviteSearch = ({ navigation }: { navigation: any }) => {
             })
                 .then((response) => {
 
-                    //   console.log(response.data,"fsfsf")
                     const newList = response.data.users.map((x: { id: String; }) => x.id)
-                    console.log(newList)
                     setAllUsers(newList);
 
                 })
@@ -43,7 +41,7 @@ const InviteSearch = ({ navigation }: { navigation: any }) => {
 
     useEffect(() => {
 
-        const index = allUsers.indexOf(user);
+        const index = allUsers.indexOf(user.id);
         if (index != -1) {
             allUsers.splice(index, 1);
 
@@ -57,7 +55,6 @@ const InviteSearch = ({ navigation }: { navigation: any }) => {
         }
         setSearchResults(results);
 
-        console.log(results)
     }, [invitee])
 
 
@@ -66,14 +63,13 @@ const InviteSearch = ({ navigation }: { navigation: any }) => {
         await API.put('goGivers', '/goGivers/groups/sendInvite', {
             credentials: 'include',
             body: {
-                "sender": user,
+                "sender": user.id,
                 "username": result,
                 "groupId": group.id
             },
             response: true
         })
             .then((response) => {
-                console.log(response.data, "fsfsf")
 
             })
             .catch(error => Alert.alert(error.response.data.errorMessage))

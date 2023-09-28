@@ -24,6 +24,9 @@ export type InviteType = {
     invites?: string[];
     startDate?: Date;
     moneyPool?:number;
+    lastStavaCheck?: Date;
+    createdAt?: Date;
+
   };
   
   export type UsersModel = {
@@ -31,10 +34,13 @@ export type InviteType = {
     email: string;
     username: string;
     groups?: string[];
-    totalMileag?: number;
+    totalMileage?: number;
     totalMoneyRaised?: number;
     totalMoneyDonated?: number;
     stravaRefresh?: string;
     invites?: InviteType[];
+    lastStavaCheck?: Date;
+    createdAt?: Date;
+
   };
   

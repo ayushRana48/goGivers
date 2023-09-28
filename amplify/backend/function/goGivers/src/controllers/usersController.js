@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk');
 const moment = require('moment'); // Don't forget to import 'moment' if you haven't already
 const crypto = require('crypto');
+const { run } = require('jest');
 
 AWS.config.update({ region: 'us-west-1' });
 const docClient = new AWS.DynamoDB.DocumentClient();
@@ -9,6 +10,8 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 const test2 = async(req,res)=>{
   res.json("success2")
 }
+
+
 //register unser
 const newUser = async (req, res) => {
   const { username, email } = req.body;
@@ -106,8 +109,112 @@ const reauthorizeStrava = async (req, res) => {
 }
 
 
+const updateTotalMile = async(req,res)=>{
+  const { username,currTotalMile,lastStravaCheck,refresh,createdAt } = req.body;
+
+  const currTime = moment().utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+
+  const updateUserParams = {
+    TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': username.toLowerCase() },
+    UpdateExpression: 'set lastStravaCheck = :lastStravaCheck', // Update the 'stravaRefresh' attribute
+    ExpressionAttributeValues: { // Define the ExpressionAttributeValues
+      ':lastStravaCheck': currTime // Set the value of the 'stravaRefresh' attribute to the 'refresh' variable
+    }
+  };
+
+  let floorTime;
+  if(lastStravaCheck){
+    floorTime=lastStravaCheck;
+  }
+  else{
+    floorTime=createdAt;
+  }
+
+  const auth_link="https://www.strava.com/oauth/token"
+  let access_token;
+
+  try {
+    const response = await fetch(auth_link, {
+      method: 'post',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        client_id: '111319',
+        client_secret: 'b03bfa9b476ff3e1536d632e33224d6b23f0f506',
+        refresh_token: refresh,
+        grant_type: 'refresh_token'
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to reauthorize Strava.'); // Handle non-2xx responses
+    }
+    const data = await response.json();
+    access_token=data.access_token 
+  } catch (error) {
+    console.error('Error reauthorizing Strava:', error);
+    res.status(500).json({ error: 'Failed to reauthorize Strava.' });
+    return;
+  }
+  console.log(access_token);
+
+
+  let runs=[];
+
+
+  const activitiesURL=`https://www.strava.com/api/v3/athlete/activities?access_token=${access_token}`
+  
+
+  try {
+    await docClient.update(updateUserParams).promise(); 
+  } catch (err) {
+    res.status(400).json({ errorMessage:"can'update lastStravaRefresh" });
+  }
+
+  
+  try {
+    const response = await fetch(activitiesURL, {
+      method: 'get',
+      headers: {
+        'Accept': 'application/json, text/plain, */*',
+        'Content-Type': 'application/json'
+      },
+    });
+    const data = await response.json();
+    runs=data;
+    // res.json({data:data})
+  } catch (error) {
+    console.error('Error getting runs:', error);
+    res.status(500).json({ error: 'Failed to reauthorize Strava.' });
+    return;
+  }
+
+  let distanceUpdate=currTotalMile;
+  for(let i=0;i<runs.length;i++){
+    const runStartDate = new Date(runs[i].start_date);
+    const floorTimeDate = new Date(floorTime);
+    if(runStartDate>=floorTimeDate){
+      distanceUpdate+=runs[i].distance/1609.34.toFixed(2);
+    }
+    else{
+      console.log(floorTime);
+      console.log(runs[i].start_date);
+      break;
+    }
+  }
+
+  res.json({"distanceUpdate":distanceUpdate.toFixed(2)});
+  
+
+
+}
+
+
 const getUser=async(req,res)=>{
-  const  username  = req.query.username;
+  const username  = req.query.username;
 
   const userParams = {
     TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
@@ -150,4 +257,4 @@ const getAllUsers = async (req, res) => {
 
 
 
-module.exports={test2,newUser,addStravaRefresh,reauthorizeStrava,getUser,getAllUsers};
+module.exports={test2,newUser,addStravaRefresh,reauthorizeStrava,getUser,getAllUsers,updateTotalMile};

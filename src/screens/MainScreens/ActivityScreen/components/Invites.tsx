@@ -2,37 +2,86 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet, Alert, Pressable, Image, ScrollView } from 'react-native';
 import { Auth, API } from "aws-amplify";
 import 'react-native-url-polyfill/auto'
-import CustomInput from '../../../../components/CustomInput/CustomInput';
 import { useUserContext } from '../../../../../UserContext';
-import { useRoute } from '@react-navigation/native';
 import 'react-native-url-polyfill/auto'
 
-const Invites = ({ navigation }: { navigation: any }) => {
-    const { user } = useUserContext();
+const Invites = ({ navigation, username }: { navigation: any; username: string }) => {
+    const { user,setUser } = useUserContext();
     const [invites, setInvites] = useState<{ sender: String, groupId: String }[]>([]);
-    const [user2, setUser2] = useState<any>();
     const [openInvite,setOpenInvite]=useState(false);
+
+    useEffect(()=>{
+        const fetchData = async () => {
+            console.log("FETCHINF DASTAAA")
+            console.log(username)
+            try {
+                const url = `/goGivers/users/getUser?username=airborm1`;
+                console.log(url)
+                const response = await API.get('goGivers', url, {
+                    response: true
+                });
+              
+                setUser(response.data?.user);
+                console.log(response.data?.user)
+                setInvites(response.data?.user.invites); // Use response.data to set invites
+                // updateMileage();
+            } catch (error) {
+                console.log("error getting usddsere")
+                console.log(error)
+            }
+        };
+    },[])
 
 
     useEffect(() => {
         const fetchData = async () => {
-            console.log(user, "ffdf");
+            console.log("FETCHINF DASTAAA")
+            console.log(username)
             try {
-                const url = `/goGivers/users/getUser?username=${user}`;
-                console.log(url);
+                const url = `/goGivers/users/getUser?username=airborm1`;
+                console.log(url)
                 const response = await API.get('goGivers', url, {
                     response: true
                 });
-                console.log(response.data, "fsfdffsf");
-                setUser2(response.data.user);
-                console.log(response.data?.user.invites);
+              
+                setUser(response.data?.user);
+                console.log(response.data?.user)
                 setInvites(response.data?.user.invites); // Use response.data to set invites
+                // updateMileage();
+            } catch (error) {
+                console.log("error getting usddsere")
+                console.log(error)
+            }
+        };
+
+        const updateMileage = async () => {
+            try {
+                const url = `/goGivers/users/updateTotalMile`;
+                const response = await API.put('goGivers', url, {
+                    response: true,
+                    body:{
+                        "username":user.id,
+                        "currTotalMile":user.totalMileage,
+                        "lastStravaCheck":user.lastStravaCheck,
+                        "refresh":user.stravaRefresh,
+                        "createdAt":user.createdAt, 
+                    }
+                });
+
+                const newUser = {...user,totalMileage:response.data.distanceUpdate}
+              
+                setUser(newUser);
+                console.log(response.data.distanceUpdate);
+                console.log(newUser);
             } catch (error) {
                 console.log(error)
             }
         };
 
-        fetchData();
+
+
+
+        // fetchData();
     }, []);
 
 
@@ -52,7 +101,6 @@ const Invites = ({ navigation }: { navigation: any }) => {
             response: true
         })
             .then((response) => {
-                console.log(response.data, "fsfsf")
 
             })
             .catch(error => console.log(error))
@@ -76,12 +124,15 @@ const Invites = ({ navigation }: { navigation: any }) => {
         ));
 
     function open(){
+        console.log("clickk")
+        console.log(openInvite)
         if(invites?.length==0){
             return;
         }
 
         if(openInvite){
             setOpenInvite(false);
+            return;
         }
 
         setOpenInvite(true);
@@ -96,7 +147,7 @@ const Invites = ({ navigation }: { navigation: any }) => {
                 <Text style={styles.invitesText}>Invites </Text>
                 <Pressable style={{marginLeft:'auto'}} onPress={open}><Text>{invites ? invites?.length : 0}</Text></Pressable>
             </View>
-            <View style={{ height: 1.5, backgroundColor: '#d4d2d2', width: '100%', marginVertical: 5 }}></View>
+            {!openInvite && <View style={{ height: 1.5, backgroundColor: '#d4d2d2', width: '100%', marginVertical: 5 }}></View>}
 
             {openInvite && renderInviteComponents}
         </ScrollView>

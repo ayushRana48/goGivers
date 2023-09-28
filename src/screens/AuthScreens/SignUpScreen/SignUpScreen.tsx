@@ -23,7 +23,6 @@ const SignUpScreen = ({navigation}:any)=>{
         setLoading(true)
         try{
             const response = await Auth.signUp({username,password,attributes:{email,preferred_username:username}})
-            console.log(response)
             navigation.navigate('ConfirmEmail', {username,email});
         }
         catch(e){

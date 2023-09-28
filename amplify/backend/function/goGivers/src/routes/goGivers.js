@@ -13,11 +13,15 @@ router.put('/groups/changeHost', groupController.changeHost);
 router.get('/groups/getGroup', groupController.getGroup);
 router.put('/groups/editGroup', groupController.editGroup);
 
+
 router.post('/users/newUser', userController.newUser);
 router.put('/users/addStravaRefresh', userController.addStravaRefresh);
 router.post('/users/reauthorizeStrava', userController.reauthorizeStrava);
 router.get('/users/getUser', userController.getUser);
 router.get('/users/getAllUsers', userController.getAllUsers);
+router.put('/users/updateTotalMile', userController.updateTotalMile);
+router.get('/users',userController.test2);
+router.get('/',userController.test2);
 
 
 

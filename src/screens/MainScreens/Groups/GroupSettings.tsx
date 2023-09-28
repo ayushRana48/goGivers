@@ -12,7 +12,7 @@ import MemberSettings from './components/MemberSettings';
 import { useGroupsContext } from './GroupsContext';
 
 const GroupSettings = ({ navigation }: { navigation: any }) => {
-  const { user } = useUserContext();
+  const { user,setUser} = useUserContext();
   const {groupsData,setGroupsData}= useGroupsContext();
 
 
@@ -37,7 +37,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
 
   const [editGroupInfo, setEditGroupInfo] = useState<newGroupType>({ groupName: group.groupName, minMile: group.minMile, minDays: group.minDays, moneyMile: group.minMile, startDate: group.startDate })
 
-  const isHost = (user == group.host.username)
+  const isHost = (user.id == group.host.username)
 
 
   //to reset after cancel
@@ -49,14 +49,13 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
     await API.put('goGivers', '/goGivers/groups/sendInvite', {
       credentials: 'include',
       body: {
-        "sender": user,
+        "sender": user.id,
         "username": invitee,
         "groupId": group.id
       },
       response: true
     })
       .then((response) => {
-        console.log(response.data, "fsfsf")
 
       })
       .catch(error => Alert.alert(error.response.data.errorMessage))
@@ -84,7 +83,6 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
     setIsEdit(false);
     for (let i = 0; i < group.usersList.length; i++) {
       if (group.usersList[i].username == user) {
-        console.log("new Host ", group.usersList[i])
         setGroup({ ...group, host: group.usersList[i] })
 
       }
@@ -123,7 +121,6 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
         response: true
       })
         .then((response) => {
-          console.log(response.data.users[0].id, "fsfsf")
 
         })
         .catch(error => Alert.alert(error.response.data.errorMessage))
@@ -139,7 +136,6 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
   };
 
   async function leaveGroup(username: String) {
-    console.log("LEAVEEEEEEEEEEE")
     const newList = groupsData.filter((x: string)=>x!=group.id)
     
     await API.put('goGivers', '/goGivers/groups/leaveGroup', {
@@ -151,8 +147,9 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
       }
     })
     .then((response) => {
-      console.log(response.data, "fsfsf")
-      navigation.navigate('GroupList')
+      navigation.navigate('GroupList');
+      const newUser = {...user,groups:newList};
+      setUser(newUser)
       setGroupsData(newList);
 
     })
@@ -160,21 +157,22 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
   }
 
   async function deleteGroup() {
-    console.log("DELEETEE")
     const newList = groupsData.filter((x: string)=>x!=group.id)
+
 
     await API.del('goGivers', '/goGivers/groups/deleteGroup', {
       credentials: 'include',
       response: true,
       body: {
-        "username": user,
+        "username": user.id,
         "groupId": group.id
       }
     })
       .then((response) => {
-        console.log(response)
         navigation.navigate('GroupList')
         setGroupsData(newList);
+        const newUser = {...user,groups:newList};
+        setUser(newUser)
 
 
       })
@@ -187,12 +185,11 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
     setIsEdit(false)
 
     setGroup({ ...group, groupName: editGroupInfo.groupName, minMile: editGroupInfo.minMile, minDays: editGroupInfo.minDays, moneyMile: editGroupInfo.moneyMile, startDate: editGroupInfo.startDate })
-    console.log("SAVVVEEEEE")
     await API.put('goGivers', '/goGivers/groups/editGroup', {
       credentials: 'include',
       response: true,
       body: {
-        "username": user,
+        "username": user.id,
         "groupId": group.id,
         "minMile": editGroupInfo.minMile,
         "moneyMile": editGroupInfo.moneyMile,
@@ -202,7 +199,6 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
     })
 
       .then((response) => {
-        console.log(response.data.users[0].id, "fsfsf")
 
       })
       .catch(error => Alert.alert(error.response.data.errorMessage))
@@ -236,7 +232,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
           </View>
         </View>
         <View style={{ marginTop: 30, marginLeft: 10 }}>
-          {isEdit && group.host.username==user?
+          {isEdit && group.host.username==user.id?
             <>
               <View>
                 <View style={{ flexDirection: 'row', marginTop: 30 }}>

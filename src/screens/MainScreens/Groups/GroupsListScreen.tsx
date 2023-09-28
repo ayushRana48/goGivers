@@ -25,15 +25,12 @@ const GroupsListScreen = ({navigation}:any) => {
 
 
   useEffect(() => {
-    console.log("FETTCHHh")
     const fetchData = async () => {
       try {
-        const url = `/goGivers/users/getUser?username=${user}`;
-        console.log(url);
+        const url = `/goGivers/users/getUser?username=${user.id}`;
         const response = await API.get('goGivers', url, {
           response: true
         });
-        console.log(response.data)
         
         if (response.data.user.groups.length > 0) {
           setGroups(response.data.user.groups);
@@ -49,15 +46,24 @@ const GroupsListScreen = ({navigation}:any) => {
       }
     };
     fetchData();
-  }, []);
 
-  const groupItemList = groups?.map(x=><GroupItem key={x} groupName={x} navigation={navigation}></GroupItem>)
+    if(user.groups?.length>0){
+      setGroups(user.groups);
+      setGroupsData(user.groups);
+    }
+    else{
+      setGroups([]);
+      setGroupsData([])
+    }
+   
+
+  }, []);
   
  
   return (
     <ScrollView>
       <View style={{marginVertical: 20}}>
-        <Text style={{ alignSelf: 'center', fontSize: 20 }}>{user}'s groups</Text>
+        <Text style={{ alignSelf: 'center', fontSize: 20 }}>{user.id}'s groups</Text>
       </View>
       <Pressable  style={{ position: 'absolute', right: 20,top:20}} onPress={newGroup}>
         <Image  source={require('../../../../assets/images/NewGroupIcon.png')} />

@@ -3,31 +3,54 @@ import { View, Text, StyleSheet,Image,useWindowDimensions, Alert } from "react-n
 import CustomInput from "../../../components/CustomInput/CustomInput"
 import CustomButton from "../../../components/CustomButton/CustomButton"
 import { Linking } from 'react-native'
-import { Auth } from "aws-amplify";
-import { useUserContext } from "../../../../UserContext";
+import { API, Auth } from "aws-amplify";
+import { useDontUseContext } from "../../../../DontUseContext";
 
 const SignInScreen = ({navigation}:any)=>{
-    const { setUser } = useUserContext();
     const [username,setUsername]=useState<string>("");
     const [password,setPassword]=useState<string>("");
     const [loading,setLoading]= useState(false)
 
-   
+    const {setName} = useDontUseContext();
+
+    useEffect(()=>{
+        const fetchData = async () => {
+            console.log("FETCHINF DASTAAAf from MAINN NAVE")
+            try {
+                const url = `/goGivers`;
+                console.log(url)
+                const response = await API.get('goGivers', url, {
+                    response: true
+                });
+              
+                // setUser(response.data?.user);
+                console.log(response.data)
+                // setInvites(response.data?.user.invites); // Use response.data to set invites
+                // updateMileage();
+            } catch (error) {
+                console.log("error getting usddserefff")
+                console.log(error)
+            }
+        };
+    
+        
+        fetchData()
+    },[])
 
     const onSignInPressed=async ():Promise<void>=>{
-        console.log(username)
         if(loading){
             return;
         }
         setLoading(true)
         try{
             const response = await Auth.signIn(username,password)
-            console.log(response)
-            console.log("sfwf")
-            setUser(username);
+            setName(username);
+            console.log("newUsername HEree", username)
+            console.log(username);
             navigation.navigate('MainNav',{username});
             setUsername("")
             setPassword("")
+            
         }
         catch(e){
             if(e instanceof Error){
@@ -42,12 +65,7 @@ const SignInScreen = ({navigation}:any)=>{
         // navigation.navigate('ForgotPassword');
         navigation.goBack();
     }
-    const onPressGoogle=():void=>{
-        console.log("goog")
-    }
-    const onPressApple=():void=>{
-        console.log("apple")
-    }
+
     const onPressNew=():void=>{
         navigation.navigate('SignUp');
     }

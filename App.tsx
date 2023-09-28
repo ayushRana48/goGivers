@@ -11,6 +11,7 @@ import config from './src/aws-exports'
 import { Amplify, Auth } from 'aws-amplify';
 import MainNav from './src/MainNav';
 import { UserProvider } from './UserContext';
+import { DontUseProvider } from './DontUseContext';
 
 import {
   SafeAreaView,
@@ -31,7 +32,9 @@ const App = () => {
   return (
     <SafeAreaView style={styles.root}>
       <UserProvider>
-        <Nav></Nav>
+        <DontUseProvider>
+          <Nav></Nav>
+        </DontUseProvider>
       </UserProvider>
     </SafeAreaView>
   );

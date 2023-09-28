@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, useWindowDimensions, Alert } from "react-native";
 import CustomInput from "../../../components/CustomInput/CustomInput"
 import CustomButton from "../../../components/CustomButton/CustomButton"
-import { useNavigation, NavigationContainerRef, NavigationProp } from '@react-navigation/native';
 import { useRoute } from "@react-navigation/native";
 import { Auth,API } from "aws-amplify";
-import { useUserContext } from "../../../../UserContext";
+import { useDontUseContext } from "../../../../DontUseContext";
 const ConfirmScreen = ({navigation}:any) => {
   const route = useRoute()
   //@ts-ignore
@@ -15,8 +14,8 @@ const ConfirmScreen = ({navigation}:any) => {
   const [confirmation, setConfirmation] = useState<string>("");
   const [loading, setLoading] = useState(false)
   const [loading2, setLoading2] = useState(false)
+  const {setName} = useDontUseContext();
 
-  const {setUser} = useUserContext();
 
   const onConfirmPressed = async () => {
     if (loading) {
@@ -25,7 +24,6 @@ const ConfirmScreen = ({navigation}:any) => {
     setLoading(true)
     try {
       const response = await Auth.confirmSignUp(username, confirmation)
-      console.log(response)
 
       await API.post('goGivers', '/goGivers/users/newUser', {
         body:{
@@ -35,13 +33,11 @@ const ConfirmScreen = ({navigation}:any) => {
         response:true
       })
       .then((response) => {
-        console.log(response)
-        setUser(username);
       })
       .catch((e) => {
         console.log("not working", e);
       });
-
+      setName(username);
       navigation.navigate("MainNav",{username})
     }
     catch (e) {
@@ -63,7 +59,6 @@ const ConfirmScreen = ({navigation}:any) => {
     }
     try {
       const response = await Auth.resendSignUp(username)
-      console.log(response)
       Alert.alert('New Code Sent to your Email')
     }
     catch (e) {

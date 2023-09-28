@@ -20,7 +20,7 @@ type newGroupType = {
   
 
 const NewGroupScreen = ({navigation}:any) => {
-    const {user } = useUserContext();
+    const {user, setUser } = useUserContext();
     const {groupsData,setGroupsData}= useGroupsContext();
 
 
@@ -55,12 +55,10 @@ const NewGroupScreen = ({navigation}:any) => {
 
     
 
-    console.log("the host is", user);
-    console.log(groupInfo);
     await API.post('goGivers', '/goGivers/groups/newGroup', {
         credentials: 'include',
         body:{
-            "username":user,
+            "username":user.id,
             "groupName":groupInfo.groupName,
             "minMile":groupInfo.minMile,
             "minDays":groupInfo.minDays,
@@ -69,10 +67,12 @@ const NewGroupScreen = ({navigation}:any) => {
         response:true
       })
       .then((response) => {
-        console.log(response.data.newGroup.id,"fsfsf")
         const newList = [...groupsData];
         newList.push(response.data.newGroup.id);
-                setGroupsData(newList)
+        setGroupsData(newList)
+        const newUser = {...user,groups:newList};
+    
+        setUser(newUser)
 
         navigation.navigate('GroupScreen', { groupId: response.data.newGroup.id });
 
@@ -92,7 +92,7 @@ const NewGroupScreen = ({navigation}:any) => {
  
   return (
     <View style={styles.container}>
-      <Text>{user} j</Text>
+      <Text>{user.id} j</Text>
       <View style={{width:'90%'}}>
         <CustomInput placeholder='Group Name' value={groupInfo.groupName} setValue={(value) => changeGroupInfo('groupName', value)} secureTextEntry={false}></CustomInput>
         <Text style={{marginLeft:10, marginTop:-10, fontSize:12}}>Group Name</Text>

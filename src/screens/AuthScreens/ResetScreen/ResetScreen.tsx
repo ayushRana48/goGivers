@@ -33,7 +33,6 @@ const ResetScreen = ({navigation}:any)=>{
           navigation.navigate("SignUp")
         }
         catch(error){
-          console.log("ppp")
           console.log(error)
         }
       };
