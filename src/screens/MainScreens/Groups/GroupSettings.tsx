@@ -12,7 +12,7 @@ import MemberSettings from './components/MemberSettings';
 import { useGroupsContext } from './GroupsContext';
 
 const GroupSettings = ({ navigation }: { navigation: any }) => {
-  const { user } = useUserContext();
+  const { user,setUser } = useUserContext();
   const {groupsData,setGroupsData}= useGroupsContext();
 
 
@@ -37,7 +37,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
 
   const [editGroupInfo, setEditGroupInfo] = useState<newGroupType>({ groupName: group.groupName, minMile: group.minMile, minDays: group.minDays, moneyMile: group.minMile, startDate: group.startDate })
 
-  const isHost = (user == group.host.username)
+  const isHost = (user.id == group.host.username)
 
 
   //to reset after cancel
@@ -49,7 +49,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
     await API.put('goGivers', '/goGivers/groups/sendInvite', {
       credentials: 'include',
       body: {
-        "sender": user,
+        "sender": user.id,
         "username": invitee,
         "groupId": group.id
       },
@@ -154,6 +154,8 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
       console.log(response.data, "fsfsf")
       navigation.navigate('GroupList')
       setGroupsData(newList);
+      const newUser = {...user,groups:newList};
+      setUser(newUser)
 
     })
     .catch(error => Alert.alert(error.response.data.errorMessage))
@@ -167,7 +169,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
       credentials: 'include',
       response: true,
       body: {
-        "username": user,
+        "username": user.id,
         "groupId": group.id
       }
     })
@@ -175,6 +177,8 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
         console.log(response)
         navigation.navigate('GroupList')
         setGroupsData(newList);
+        const newUser = {...user,groups:newList};
+        setUser(newUser)
 
 
       })
@@ -192,7 +196,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
       credentials: 'include',
       response: true,
       body: {
-        "username": user,
+        "username": user.id,
         "groupId": group.id,
         "minMile": editGroupInfo.minMile,
         "moneyMile": editGroupInfo.moneyMile,
@@ -236,7 +240,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
           </View>
         </View>
         <View style={{ marginTop: 30, marginLeft: 10 }}>
-          {isEdit && group.host.username==user?
+          {isEdit && group.host.username==user.id?
             <>
               <View>
                 <View style={{ flexDirection: 'row', marginTop: 30 }}>
@@ -361,7 +365,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
                 {group.usersList.length <= 1 ?
                   <CustomButton text='Delete Group' type='primary' bgColor='red' onPress={deleteGroup} />
                   :
-                  <CustomButton text='Leave Group' type='primary' bgColor='red' onPress={() => leaveGroup(user)} />
+                  <CustomButton text='Leave Group' type='primary' bgColor='red' onPress={() => leaveGroup(user.id)} />
 
                 }
               </>

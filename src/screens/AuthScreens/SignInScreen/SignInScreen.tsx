@@ -5,12 +5,13 @@ import CustomButton from "../../../components/CustomButton/CustomButton"
 import { Linking } from 'react-native'
 import { Auth } from "aws-amplify";
 import { useUserContext } from "../../../../UserContext";
+import { useDontUseContext } from "../../../DontUseContext";
 
 const SignInScreen = ({navigation}:any)=>{
-    const { setUser } = useUserContext();
     const [username,setUsername]=useState<string>("");
     const [password,setPassword]=useState<string>("");
     const [loading,setLoading]= useState(false)
+    const {setName} =useDontUseContext()
 
    
 
@@ -24,7 +25,7 @@ const SignInScreen = ({navigation}:any)=>{
             const response = await Auth.signIn(username,password)
             console.log(response)
             console.log("sfwf")
-            setUser(username);
+            setName(username);
             navigation.navigate('MainNav',{username});
             setUsername("")
             setPassword("")
@@ -42,12 +43,7 @@ const SignInScreen = ({navigation}:any)=>{
         // navigation.navigate('ForgotPassword');
         navigation.goBack();
     }
-    const onPressGoogle=():void=>{
-        console.log("goog")
-    }
-    const onPressApple=():void=>{
-        console.log("apple")
-    }
+  
     const onPressNew=():void=>{
         navigation.navigate('SignUp');
     }

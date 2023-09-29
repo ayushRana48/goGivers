@@ -66,7 +66,7 @@ const InviteSearch = ({ navigation }: { navigation: any }) => {
         await API.put('goGivers', '/goGivers/groups/sendInvite', {
             credentials: 'include',
             body: {
-                "sender": user,
+                "sender": user.id,
                 "username": result,
                 "groupId": group.id
             },

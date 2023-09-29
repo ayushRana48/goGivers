@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, Alert, Pressable, Image, ScrollView } from 'react-native';
+import { View, Text, Button, StyleSheet, Alert, Pressable, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { Auth, API } from "aws-amplify";
 import 'react-native-url-polyfill/auto'
 import CustomInput from '../../../../components/CustomInput/CustomInput';
@@ -8,37 +8,25 @@ import { useRoute } from '@react-navigation/native';
 import 'react-native-url-polyfill/auto'
 
 const Invites = ({ navigation }: { navigation: any }) => {
-    const { user } = useUserContext();
+    const { user, setUser } = useUserContext();
     const [invites, setInvites] = useState<{ sender: String, groupId: String }[]>([]);
-    const [user2, setUser2] = useState<any>();
-    const [openInvite,setOpenInvite]=useState(false);
-
+    const [openInvite, setOpenInvite] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchData = async () => {
-            console.log(user, "ffdf");
-            try {
-                const url = `/goGivers/users/getUser?username=${user}`;
-                console.log(url);
-                const response = await API.get('goGivers', url, {
-                    response: true
-                });
-                console.log(response.data, "fsfdffsf");
-                setUser2(response.data.user);
-                console.log(response.data?.user.invites);
-                setInvites(response.data?.user.invites); // Use response.data to set invites
-            } catch (error) {
-                console.log(error)
-            }
-        };
+        if (user?.id) {
+            setLoading(false);
+            setInvites(user.invites)
 
-        fetchData();
-    }, []);
+        }
+    }, [user])
+
+
 
 
 
     async function toggleInvite(accept: boolean, groupId: String) {
-        if(invites?.length==1){
+        if (invites?.length == 1) {
             setOpenInvite(false);
         }
         setInvites((prevInvites) => prevInvites.filter((invite) => invite.groupId !== groupId));
@@ -46,13 +34,19 @@ const Invites = ({ navigation }: { navigation: any }) => {
             credentials: 'include',
             body: {
                 "accept": accept,
-                "username": user,
+                "username": user.id,
                 "groupId": groupId
             },
             response: true
         })
             .then((response) => {
                 console.log(response.data, "fsfsf")
+                if(accept){
+                    const newGroupsList = [...user.groups, groupId]; // Create a new array with groupId appended
+                    const newUser = { ...user, groups: newGroupsList }; // Create a new user object with the updated groups array
+                    setUser(newUser); // Update the user state with the new user object
+                     
+                }
 
             })
             .catch(error => console.log(error))
@@ -75,13 +69,14 @@ const Invites = ({ navigation }: { navigation: any }) => {
             </View>
         ));
 
-    function open(){
-        if(invites?.length==0){
+    function open() {
+        if (invites?.length == 0) {
             return;
         }
 
-        if(openInvite){
+        if (openInvite) {
             setOpenInvite(false);
+            return;
         }
 
         setOpenInvite(true);
@@ -92,13 +87,16 @@ const Invites = ({ navigation }: { navigation: any }) => {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <View style={{flexDirection:'row', marginTop:30}}>
-                <Text style={styles.invitesText}>Invites </Text>
-                <Pressable style={{marginLeft:'auto'}} onPress={open}><Text>{invites ? invites?.length : 0}</Text></Pressable>
-            </View>
-            <View style={{ height: 1.5, backgroundColor: '#d4d2d2', width: '100%', marginVertical: 5 }}></View>
+            {loading ? <ActivityIndicator size="large" color="blue" />
+                :
+                <><View style={{ flexDirection: 'row', marginTop: 30 }}>
+                    <Text style={styles.invitesText}>Invites </Text>
+                    <Pressable style={{ marginLeft: 'auto' }} onPress={open}><Text>{invites ? invites?.length : 0}</Text></Pressable>
+                </View><View style={{ height: 1.5, backgroundColor: '#d4d2d2', width: '100%', marginVertical: 5 }}></View>
 
-            {openInvite && renderInviteComponents}
+                    {openInvite && renderInviteComponents}
+                </>
+            }
         </ScrollView>
     );
 };
@@ -112,7 +110,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'left',
         paddingRight: 10,
-       
+
     },
     inviteContainer: {
         paddingVertical: 10,

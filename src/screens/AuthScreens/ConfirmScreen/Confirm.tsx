@@ -6,6 +6,8 @@ import { useNavigation, NavigationContainerRef, NavigationProp } from '@react-na
 import { useRoute } from "@react-navigation/native";
 import { Auth,API } from "aws-amplify";
 import { useUserContext } from "../../../../UserContext";
+import { useDontUseContext } from "../../../DontUseContext";
+
 const ConfirmScreen = ({navigation}:any) => {
   const route = useRoute()
   //@ts-ignore
@@ -16,7 +18,7 @@ const ConfirmScreen = ({navigation}:any) => {
   const [loading, setLoading] = useState(false)
   const [loading2, setLoading2] = useState(false)
 
-  const {setUser} = useUserContext();
+  const {setName} = useDontUseContext()
 
   const onConfirmPressed = async () => {
     if (loading) {
@@ -36,7 +38,7 @@ const ConfirmScreen = ({navigation}:any) => {
       })
       .then((response) => {
         console.log(response)
-        setUser(username);
+        setName(username);
       })
       .catch((e) => {
         console.log("not working", e);

@@ -22,8 +22,7 @@ import {
   View,
 } from 'react-native';
 import Nav from './src/Nav';
-import { User } from './src/models';
-
+import { DontUseProvider } from './src/DontUseContext';
 Amplify.configure(config)
 const App = () => {
 
@@ -31,7 +30,9 @@ const App = () => {
   return (
     <SafeAreaView style={styles.root}>
       <UserProvider>
+        <DontUseProvider>
         <Nav></Nav>
+        </DontUseProvider>
       </UserProvider>
     </SafeAreaView>
   );

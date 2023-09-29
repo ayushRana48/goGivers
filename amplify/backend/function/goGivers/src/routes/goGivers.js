@@ -15,6 +15,7 @@ router.put('/groups/editGroup', groupController.editGroup);
 
 router.post('/users/newUser', userController.newUser);
 router.put('/users/addStravaRefresh', userController.addStravaRefresh);
+router.put('/users/updateTotalMile', userController.updateTotalMile);
 router.post('/users/reauthorizeStrava', userController.reauthorizeStrava);
 router.get('/users/getUser', userController.getUser);
 router.get('/users/getAllUsers', userController.getAllUsers);

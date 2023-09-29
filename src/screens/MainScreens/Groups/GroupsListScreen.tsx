@@ -1,75 +1,66 @@
 import React, { useEffect, useState } from 'react';
-import {View, Text, Button, ActivityIndicator,ScrollView, Image, Pressable} from 'react-native';
+import { View, Text, Button, ActivityIndicator, ScrollView, Image, Pressable } from 'react-native';
 import CustomButton from '../../../components/CustomButton';
-import {useNavigation, NavigationContainerRef, NavigationProp} from '@react-navigation/native';
+import { useNavigation, NavigationContainerRef, NavigationProp } from '@react-navigation/native';
 import { useRoute } from "@react-navigation/native";
-import { Auth,API } from "aws-amplify";
+import { Auth, API } from "aws-amplify";
 import { authorize } from 'react-native-app-auth';
 import { Linking } from 'react-native'
 import 'react-native-url-polyfill/auto'
-import {GroupsModel} from '../../../types/types'
+import { GroupsModel } from '../../../types/types'
 import { useUserContext } from '../../../../UserContext';
 import GroupItem from './components/GroupItem'
-import {useGroupsContext } from './GroupsContext';
+import { useGroupsContext } from './GroupsContext';
 
-const GroupsListScreen = ({navigation}:any) => {
-  const {user } = useUserContext();
-  const {groupsData,setGroupsData}= useGroupsContext();
+const GroupsListScreen = ({ navigation }: any) => {
+  const { user } = useUserContext();
+  const { groupsData, setGroupsData } = useGroupsContext();
 
-  function newGroup(){
+  function newGroup() {
     navigation.navigate('NewGroup');
   }
 
-  const [groups,setGroups] = useState<string[]>();
+  const [groups, setGroups] = useState<string[]>();
   const [loading, setLoading] = useState(true); // State for loading
 
 
   useEffect(() => {
-    console.log("FETTCHHh")
-    const fetchData = async () => {
-      try {
-        const url = `/goGivers/users/getUser?username=${user}`;
-        console.log(url);
-        const response = await API.get('goGivers', url, {
-          response: true
-        });
-        console.log(response.data)
-        
-        if (response.data.user.groups.length > 0) {
-          setGroups(response.data.user.groups);
-          setGroupsData(response.data.user.groups);
-        } else {
-          setGroups([]);
-          setGroupsData([])
-        }
-      } catch (e) {
-        console.log("can't get groups list", e);
-      } finally {
-        setLoading(false); // Set loading to false when data fetching is done
+    if (user?.id) {
+      console.log("FETTCHHh")
+      if (user.groups) {
+        console.log(user.groups)
+        setGroups(user.groups);
+        setGroupsData(user.groups);
+        setLoading(false);
       }
-    };
-    fetchData();
-  }, []);
+      else {
+        setGroups([])
+        setGroupsData([])
+      }
+    }
 
-  const groupItemList = groups?.map(x=><GroupItem key={x} groupName={x} navigation={navigation}></GroupItem>)
-  
- 
+
+  }, [user]);
+
+  const groupItemList = groups?.map(x => <GroupItem key={x} groupName={x} navigation={navigation}></GroupItem>)
+
+
   return (
     <ScrollView>
-      <View style={{marginVertical: 20}}>
-        <Text style={{ alignSelf: 'center', fontSize: 20 }}>{user}'s groups</Text>
+      <View style={{ marginVertical: 20 }}>
+        <Text style={{ alignSelf: 'center', fontSize: 20 }}>{user.id}'s groups</Text>
       </View>
-      <Pressable  style={{ position: 'absolute', right: 20,top:20}} onPress={newGroup}>
-        <Image  source={require('../../../../assets/images/NewGroupIcon.png')} />
+      <Pressable style={{ position: 'absolute', right: 20, top: 20 }} onPress={newGroup}>
+        <Image source={require('../../../../assets/images/NewGroupIcon.png')} />
       </Pressable>
 
-      <View style={{ paddingHorizontal: 40, marginTop: 20, marginBottom:15}}>
+      <View style={{ paddingHorizontal: 40, marginTop: 20, marginBottom: 15 }}>
         {loading ? ( // Display loading indicator during data fetching
           <ActivityIndicator size="large" color="blue" />
         ) : (
           <>
             {groupsData && groupsData?.length > 0 ? (
-              groupsData.map((groupName:any) => (
+              groupsData.map((groupName: any) => (
                 <GroupItem key={groupName} groupName={groupName} navigation={navigation} />
               ))
             ) : (
