@@ -26,9 +26,7 @@ const GroupsListScreen = ({ navigation }: any) => {
 
   useEffect(() => {
     if (user?.id) {
-      console.log("FETTCHHh")
       if (user.groups) {
-        console.log(user.groups)
         setGroups(user.groups);
         setGroupsData(user.groups);
         setLoading(false);

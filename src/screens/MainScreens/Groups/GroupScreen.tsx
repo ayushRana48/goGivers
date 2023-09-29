@@ -27,12 +27,9 @@ const GroupScreen = ({ navigation }: { navigation: any }) => {
     const fetchData = async () => {
       try {
         const url = `/goGivers/groups/getGroup?groupId=${encodeURIComponent(groupId)}`;
-        console.log(url);
         const response = await API.get('goGivers', url, {
           response: true
         });
-        console.log("HEIJFLKdgdsfasdgkf")
-        console.log(response.data.group)
         setGroupInfo(response.data.group);
 
 
@@ -42,7 +39,6 @@ const GroupScreen = ({ navigation }: { navigation: any }) => {
         setLoading(false); // Set loading to false when data fetching is done
       }
     };
-    console.log("s")
     fetchData();
   }, []);
 
@@ -59,7 +55,6 @@ const GroupScreen = ({ navigation }: { navigation: any }) => {
   };
 
   function toSetting(){
-    console.log('setting')
     navigation.navigate('GroupSettings', { group: groupInfo }) 
   }
   

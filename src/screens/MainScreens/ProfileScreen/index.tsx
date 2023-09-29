@@ -6,6 +6,7 @@ import { Auth,API } from "aws-amplify";
 import { authorize } from 'react-native-app-auth';
 import 'react-native-url-polyfill/auto'
 import { useDontUseContext } from '../../../DontUseContext';
+import { useUserContext } from '../../../../UserContext';
 
 
 const Profile = ({navigation}:any) => {
@@ -15,12 +16,9 @@ const Profile = ({navigation}:any) => {
   const [username,setUsername]= useState(useRoute()?.params?.username)
   const [missingScope,setMissingScope]=useState(false)
   const { setName,name } = useDontUseContext();
+  const {user,setUser}= useUserContext();
 
   
-  useEffect(()=>{
-    console.log(name)
-    console.log("from Profile")
-  },[])
   const getAuth =async() =>{  
     const client_id='111319'
     const client_secret='b03bfa9b476ff3e1536d632e33224d6b23f0f506';
@@ -38,9 +36,6 @@ const Profile = ({navigation}:any) => {
     
     try{
       const authState = await authorize(config);
-      console.log(authState)
-      console.log(authState.refreshToken)
-      console.log(name);
       if(authState.scopes[0].includes("activity:read_all") && authState.refreshToken!=null){
         setMissingScope(false)
         await API.put('goGivers', '/goGivers/users/addStravaRefresh', {
@@ -50,7 +45,10 @@ const Profile = ({navigation}:any) => {
           },
           response:true
         })
-        .then((response) => console.log(response))
+        .then((response) =>{
+          const newUser ={...user,stravaRefresh:authState.refreshToken}
+          setUser(newUser);
+        })
         .catch((e) => {
           console.log("not working", e);
         });
@@ -68,11 +66,11 @@ const Profile = ({navigation}:any) => {
 
   const Logout = async () => {
     try{
-      console.log('check')
       setName("");
       const x=await Auth.signOut()
-      console.log(x)
       navigation.navigate('SignIn');
+      setUser();
+
     }
     catch(error){
       console.log(error)
@@ -87,6 +85,7 @@ const Profile = ({navigation}:any) => {
         <CustomButton text='Connect to Strava' onPress={getAuth} type={'primary'} bgColor='#FC4C02' color='white'></CustomButton>
         {missingScope?<Text style={{fontSize: 12, alignSelf: 'center', color:'red'}}>Missing read all scope. Try Strava Auth Again</Text>
         :<Text style={{fontSize: 24, alignSelf: 'center'}}>Welcome {name}</Text>}
+        <Text style={{fontSize: 18, alignSelf: 'center',marginTop:20}}>Total Miles: {user.totalMileage}</Text>
         <View style={{marginTop:60}}>
           <CustomButton text="Logout" onPress={Logout} type={'primary'} />
         </View>

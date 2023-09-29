@@ -40,7 +40,6 @@ const Invites = ({ navigation }: { navigation: any }) => {
             response: true
         })
             .then((response) => {
-                console.log(response.data, "fsfsf")
                 if(accept){
                     const newGroupsList = [...user.groups, groupId]; // Create a new array with groupId appended
                     const newUser = { ...user, groups: newGroupsList }; // Create a new user object with the updated groups array

@@ -16,15 +16,12 @@ const SignInScreen = ({navigation}:any)=>{
    
 
     const onSignInPressed=async ():Promise<void>=>{
-        console.log(username)
         if(loading){
             return;
         }
         setLoading(true)
         try{
             const response = await Auth.signIn(username,password)
-            console.log(response)
-            console.log("sfwf")
             setName(username);
             navigation.navigate('MainNav',{username});
             setUsername("")

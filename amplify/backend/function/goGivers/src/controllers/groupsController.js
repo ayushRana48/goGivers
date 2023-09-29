@@ -113,11 +113,9 @@ const deleteGroup = async (req, res) => {
   try {
     const groupData = await docClient.get(groupParams).promise();
     if (groupData.Item == null) {
-      console.log("here1")
       res.status(400).json({ errorMessage: 'Group Not found' });
       return;
     } else {
-      console.log("her21")
 
       if (groupData.Item.host.username.toLowerCase() !== username.toLowerCase()) {
         res.status(400).json({ errorMessage: 'Not the host' });
@@ -132,7 +130,6 @@ const deleteGroup = async (req, res) => {
 
     try {
       const userData = await docClient.get(userParams).promise();
-      console.log(userData)
 
       if (userData.Item == null) {
         res.status(400).json({ errorMessage: 'User not found' });
@@ -207,14 +204,12 @@ const sendInvite = async (req, res) => {
   try {
 
     const groupData = await docClient.get(groupParams).promise();
-    console.log(groupData)
 
     if (groupData.Item == null) {
       console.log("DSd")
       res.status(400).json({ errorMessage: 'Group not found' });
       return;
     } else {
-            console.log("DSdd")
 
       const userInGroup = groupData.Item.usersList.some(user => user.username == username);
       const senderInGroup = groupData.Item.usersList.some(user => user.username == sender);

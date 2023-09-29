@@ -33,11 +33,7 @@ const MemberSettings: React.FC<MemberSettingsProps> = ({user,groupId,host,naviga
 
   // Calculate the width of the text
   const textWidth =  20 * fontSize * 0.6; // A rough estimate
-  useEffect(()=>{
-    //@ts-ignore
-    console.log(user);
-    console.log("LPOOKS")
-  },[])
+
 
   if (textWidth > MAX_TEXT_WIDTH) {
     // Reduce font size if the text exceeds max width
@@ -63,9 +59,7 @@ const MemberSettings: React.FC<MemberSettingsProps> = ({user,groupId,host,naviga
   }
 
   async function changeHost() {
-    console.log({ "username": user.Id,
-    "groupId": groupId,
-    "currHost":host})
+
     setHost(user.Id)
     await API.put('goGivers', '/goGivers/groups/changeHost', {
       credentials: 'include',

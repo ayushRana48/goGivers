@@ -16,34 +16,66 @@ const Tab = createBottomTabNavigator();
 
 export default function MainNav() {
 
-  const {name} = useDontUseContext();
-  const {setUser} = useUserContext();
+  const { name } = useDontUseContext();
+  const { user, setUser } = useUserContext();
 
-  useEffect(()=>{
-    const fetchData = async () => {
-      console.log(name, "from the mainNAVVAai");
-      try {
-          const url = `/goGivers/users/getUser?username=${name}`;
-          console.log(url);
-          const response = await API.get('goGivers', url, {
-              response: true
-          });
+  useEffect(() => {
+    const fetchData = () => {
+      const url = `/goGivers/users/getUser?username=${name}`;
+
+      API.get('goGivers', url, {
+        response: true
+      })
+        .then(response => {
           setUser(response.data.user);
           console.log(response.data.user, "fsfdffsf");
-          
-      } catch (error) {
-          console.log(error)
-      }
-  };
+          // Call updateMileage inside the .then block of setUser
+          updateMileage(response.data.user);
+        })
+        .catch(error => {
+          console.log("FFFerroreee",error);
+        });
+    };
 
-  fetchData();
-  },[])
+    const updateMileage = (updatedUser:any) => {
+      const url = `/goGivers/users/updateTotalMile`;
+      console.log({
+        "username": updatedUser.id,
+          "currTotalMile": updatedUser.totalMileage,
+          "lastStravaCheck": updatedUser.lastStravaCheck,
+          "refresh": updatedUser.stravaRefresh,
+          "createdAt": updatedUser.createdAt,
+      })
+      API.put('goGivers', url, {
+        response: true,
+        body: {
+          "username": updatedUser.id,
+          "currTotalMile": updatedUser.totalMileage,
+          "lastStravaCheck": updatedUser.lastStravaCheck,
+          "refresh": updatedUser.stravaRefresh,
+          "createdAt": updatedUser.createdAt,
+        }
+      })
+        .then(response => {
+          const newUser = { ...updatedUser, totalMileage: response.data.distanceUpdate };
+          setUser(newUser);
+          console.log(response.data)
+        })
+        .catch(error => {
+          console.log("erroreee",error);
+        });
+    };
 
-    return (
-        <Tab.Navigator screenOptions={{ headerShown: false }}>
-          <Tab.Screen name="Activity" component={Activity} />
-          <Tab.Screen name="Groups" component={Groups} />
-          <Tab.Screen name="Profile" component={Profile} />
-        </Tab.Navigator>
-    );
-  }
+    fetchData();
+  }, []);
+
+
+
+  return (
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
+      <Tab.Screen name="Activity" component={Activity} />
+      <Tab.Screen name="Groups" component={Groups} />
+      <Tab.Screen name="Profile" component={Profile} />
+    </Tab.Navigator>
+  );
+}

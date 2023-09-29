@@ -149,6 +149,7 @@ const getAllUsers = async (req, res) => {
 
 const updateTotalMile = async(req,res)=>{
   const { username,currTotalMile,lastStravaCheck,refresh,createdAt } = req.body;
+  const parsedCurrTotalMile = isNaN(currTotalMile) ? Number(currTotalMile) : currTotalMile;
 
   const currTime = moment().utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
 
@@ -230,7 +231,7 @@ const updateTotalMile = async(req,res)=>{
     return;
   }
 
-  let distanceUpdate=currTotalMile;
+  let distanceUpdate=parsedCurrTotalMile;
   for(let i=0;i<runs.length;i++){
     const runStartDate = new Date(runs[i].start_date);
     const floorTimeDate = new Date(floorTime);
@@ -244,9 +245,25 @@ const updateTotalMile = async(req,res)=>{
     }
   }
 
-  res.json({"distanceUpdate":distanceUpdate.toFixed(2)});
-  
+  const updateUserParams2 = {
+    TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': username.toLowerCase() },
+    UpdateExpression: 'set totalMileage = :totalMileage', // Update the 'stravaRefresh' attribute
+    ExpressionAttributeValues: { // Define the ExpressionAttributeValues
+      ':totalMileage': distanceUpdate.toFixed(2) // Set the value of the 'stravaRefresh' attribute to the 'refresh' variable
+    }
+  };
 
+  console.log(updateUserParams2)
+
+  
+  try {
+    await docClient.update(updateUserParams2).promise(); 
+    res.json({"distanceUpdate":distanceUpdate.toFixed(2)});
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ errorMessage:"can'update totalMileage" });
+  }
 
 }
 

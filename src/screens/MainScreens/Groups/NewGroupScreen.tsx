@@ -53,10 +53,7 @@ const NewGroupScreen = ({navigation}:any) => {
       return;
     }
 
-    
-
-    console.log("the host is", user.id);
-    console.log(groupInfo);
+  
     await API.post('goGivers', '/goGivers/groups/newGroup', {
         credentials: 'include',
         body:{
@@ -69,10 +66,9 @@ const NewGroupScreen = ({navigation}:any) => {
         response:true
       })
       .then((response) => {
-        console.log(response.data.newGroup.id,"fsfsf")
         const newList = [...groupsData];
         newList.push(response.data.newGroup.id);
-                setGroupsData(newList)
+        setGroupsData(newList)
 
         navigation.navigate('GroupScreen', { groupId: response.data.newGroup.id });
 

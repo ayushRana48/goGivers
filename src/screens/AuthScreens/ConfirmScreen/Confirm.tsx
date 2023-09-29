@@ -27,7 +27,6 @@ const ConfirmScreen = ({navigation}:any) => {
     setLoading(true)
     try {
       const response = await Auth.confirmSignUp(username, confirmation)
-      console.log(response)
 
       await API.post('goGivers', '/goGivers/users/newUser', {
         body:{
@@ -37,7 +36,6 @@ const ConfirmScreen = ({navigation}:any) => {
         response:true
       })
       .then((response) => {
-        console.log(response)
         setName(username);
       })
       .catch((e) => {
@@ -65,7 +63,6 @@ const ConfirmScreen = ({navigation}:any) => {
     }
     try {
       const response = await Auth.resendSignUp(username)
-      console.log(response)
       Alert.alert('New Code Sent to your Email')
     }
     catch (e) {

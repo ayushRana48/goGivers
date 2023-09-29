@@ -28,9 +28,7 @@ const InviteSearch = ({ navigation }: { navigation: any }) => {
             })
                 .then((response) => {
 
-                    //   console.log(response.data,"fsfsf")
                     const newList = response.data.users.map((x: { id: String; }) => x.id)
-                    console.log(newList)
                     setAllUsers(newList);
 
                 })
@@ -57,7 +55,6 @@ const InviteSearch = ({ navigation }: { navigation: any }) => {
         }
         setSearchResults(results);
 
-        console.log(results)
     }, [invitee])
 
 
@@ -73,7 +70,6 @@ const InviteSearch = ({ navigation }: { navigation: any }) => {
             response: true
         })
             .then((response) => {
-                console.log(response.data, "fsfsf")
 
             })
             .catch(error => Alert.alert(error.response.data.errorMessage))

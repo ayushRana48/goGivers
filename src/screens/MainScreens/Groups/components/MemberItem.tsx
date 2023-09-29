@@ -24,11 +24,6 @@ const MemberItem = ({ user, navigation }: { user: UserType; navigation: any })  
 
   // Calculate the width of the text
   const textWidth =  20 * fontSize * 0.6; // A rough estimate
-  useEffect(()=>{
-    //@ts-ignore
-    console.log(user);
-    console.log("LPOOKS")
-  },[])
 
   if (textWidth > MAX_TEXT_WIDTH) {
     // Reduce font size if the text exceeds max width

@@ -56,7 +56,6 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
       response: true
     })
       .then((response) => {
-        console.log(response.data, "fsfsf")
 
       })
       .catch(error => Alert.alert(error.response.data.errorMessage))
@@ -84,7 +83,6 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
     setIsEdit(false);
     for (let i = 0; i < group.usersList.length; i++) {
       if (group.usersList[i].username == user) {
-        console.log("new Host ", group.usersList[i])
         setGroup({ ...group, host: group.usersList[i] })
 
       }
@@ -123,7 +121,6 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
         response: true
       })
         .then((response) => {
-          console.log(response.data.users[0].id, "fsfsf")
 
         })
         .catch(error => Alert.alert(error.response.data.errorMessage))
@@ -139,7 +136,6 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
   };
 
   async function leaveGroup(username: String) {
-    console.log("LEAVEEEEEEEEEEE")
     const newList = groupsData.filter((x: string)=>x!=group.id)
     
     await API.put('goGivers', '/goGivers/groups/leaveGroup', {
@@ -151,7 +147,6 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
       }
     })
     .then((response) => {
-      console.log(response.data, "fsfsf")
       navigation.navigate('GroupList')
       setGroupsData(newList);
       const newUser = {...user,groups:newList};
@@ -162,7 +157,6 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
   }
 
   async function deleteGroup() {
-    console.log("DELEETEE")
     const newList = groupsData.filter((x: string)=>x!=group.id)
 
     await API.del('goGivers', '/goGivers/groups/deleteGroup', {
@@ -174,7 +168,6 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
       }
     })
       .then((response) => {
-        console.log(response)
         navigation.navigate('GroupList')
         setGroupsData(newList);
         const newUser = {...user,groups:newList};
@@ -191,7 +184,6 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
     setIsEdit(false)
 
     setGroup({ ...group, groupName: editGroupInfo.groupName, minMile: editGroupInfo.minMile, minDays: editGroupInfo.minDays, moneyMile: editGroupInfo.moneyMile, startDate: editGroupInfo.startDate })
-    console.log("SAVVVEEEEE")
     await API.put('goGivers', '/goGivers/groups/editGroup', {
       credentials: 'include',
       response: true,
@@ -206,7 +198,6 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
     })
 
       .then((response) => {
-        console.log(response.data.users[0].id, "fsfsf")
 
       })
       .catch(error => Alert.alert(error.response.data.errorMessage))
