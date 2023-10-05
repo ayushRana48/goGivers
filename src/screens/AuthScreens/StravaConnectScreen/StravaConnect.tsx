@@ -18,7 +18,6 @@ const StravaConnectScreen = ({navigation}:any) => {
   const [loading,setLoading]=useState(true);
 
   useEffect(()=>{
-    console.log(name);
     const fetchData = () => {
         const url = `/goGivers/users/getUser?username=${name}`;
   
@@ -26,7 +25,6 @@ const StravaConnectScreen = ({navigation}:any) => {
           response: true
         })
           .then(response => {
-            console.log(response.data.user, "fsfdffsf");
             if(response.data.user.stravaRefresh){
                 navigation.navigate('MainNav',{name});
             }

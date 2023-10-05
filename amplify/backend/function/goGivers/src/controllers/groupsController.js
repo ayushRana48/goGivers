@@ -771,7 +771,7 @@ const editGroup = async (req, res) => {
 
 const updateUserMiles = async(req,res) => {
   const {groupId} = req.body;
-  const currTime = moment().utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+  let currTime = moment().utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
 
 
   const groupParams = {
@@ -868,6 +868,7 @@ const updateUserMiles = async(req,res) => {
       });
       const data = await response.json();
       runs=data;
+      console.log(runs)
       // res.json({data:data})
     } catch (error) {
       console.error('Error getting runs:', error);
@@ -876,14 +877,22 @@ const updateUserMiles = async(req,res) => {
     }
 
     let distanceUpdate=currUser.mileage;
-    let runsList =currUser.runs;
-    if(currUser.runs==undefined){
-      runsList=[];
+    let runsList =[];
+    let floorTimeDate= new Date(groupData.startDate);
+
+    if(currUser.runs && currUser.runs.length>0){
+      console.log(currUser)
+      runsList=currUser.runs;
+      floorTimeDate = new Date(currUser.runs[0].date);
+      console.log("useSame",currUser.runs[0].date,"useSame",floorTimeDate)
     }
+
+
+
+    
     for(let i=0;i<runs.length;i++){
       const runStartDate = new Date(runs[i].start_date);
-      const floorTimeDate = new Date(floorTime);
-      if(runStartDate>=floorTimeDate){
+      if(runStartDate>floorTimeDate){
         distanceUpdate+=runs[i].distance/1609.34.toFixed(2);
         const run = {date:runs[i].start_date,distance:runs[i].distance/1609.34.toFixed(2)};
         runsList.push(run);
@@ -894,12 +903,16 @@ const updateUserMiles = async(req,res) => {
         break;
       }
     }
+    if(runsList.length>0){
+      currTime=runsList[0].date;
+    }
 
     const newUser = {...currUser,runs:runsList,mileage:distanceUpdate}
     newUsersList.push(newUser);
     
   }
 
+  
   const updateGroupParams = {
     TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
     Key: { 'id': groupId},
@@ -962,6 +975,11 @@ const updateStrikes =async (req,res)=>{
     res.json("not time to update strikes yet")
     return;
   }
+
+  if(!groupData.startDate){
+    res.json("not started yetffff");
+    return;
+  }
   
 
   const startDate = new Date(groupData.startDate);
@@ -987,7 +1005,7 @@ const updateStrikes =async (req,res)=>{
 
 
   usersList.forEach(user => {
-    if(!groupData.startDate || daysSinceStart<0){
+    if(daysSinceStart<0){
       res.json("not started yet");
       return;
     }

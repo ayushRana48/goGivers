@@ -3,10 +3,16 @@ export type InviteType = {
   groupId: string;
 };
 
+export type Run ={
+  date: Date;
+  distance: number;
+}
+
 export type UserType = {
   username: string;
   Id: string;
   mileage: number;
+  runs:Run[];
   moneyRaised: number;
   strikes: number;
   charity?: string;
@@ -26,6 +32,8 @@ export type GroupsModel = {
   moneyPool?:number;
   lastStavaCheck?: Date;
   createdAt?: Date;
+  nextStrikeUpdate?: Date;
+
 
 };
 

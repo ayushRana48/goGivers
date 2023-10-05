@@ -42,8 +42,25 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
 
   //to reset after cancel
   useEffect(() => {
-    setEditGroupInfo({ groupName: group.groupName, minMile: group.minMile, minDays: group.minDays, moneyMile: group.minMile, startDate: group.startDate })
-  }, [isEdit])
+    // Parse the UTC date string to a Date object1
+    let  utcStartDate;
+    let localStartDate;
+    if(group.startDate){
+      utcStartDate = new Date(group.startDate);
+      localStartDate = new Date(utcStartDate.getTime() - (utcStartDate.getTimezoneOffset() * 60000));
+
+    }
+    
+    // Convert UTC to local time
+  
+    setEditGroupInfo({ 
+      groupName: group.groupName, 
+      minMile: group.minMile, 
+      minDays: group.minDays, 
+      moneyMile: group.minMile, 
+      startDate: localStartDate // Format as local date string
+    });
+  }, [isEdit]);
 
   async function sendInvite() {
     await API.put('goGivers', '/goGivers/groups/sendInvite', {
@@ -106,6 +123,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
 
     if (openMembers) {
       setOpenMembers(false);
+      return;
     }
 
     setOpenMembers(true);
@@ -178,12 +196,28 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
       .catch(error => Alert.alert(error.response.data.errorMessage))
   }
 
+  function openEdit(){
+    if( editGroupInfo.startDate && new Date(editGroupInfo.startDate)<=new Date()){
+      Alert.alert("Can't edit, already started")
+      return;
+
+    }
+    else{
+      setIsEdit(true);
+    }
+  }
+
 
 
   async function save() {
     setIsEdit(false)
 
     setGroup({ ...group, groupName: editGroupInfo.groupName, minMile: editGroupInfo.minMile, minDays: editGroupInfo.minDays, moneyMile: editGroupInfo.moneyMile, startDate: editGroupInfo.startDate })
+    let utcStartDate;
+    if(editGroupInfo.startDate){
+      utcStartDate = new Date(editGroupInfo.startDate);
+      utcStartDate.setMinutes(utcStartDate.getMinutes() - utcStartDate.getTimezoneOffset());
+    }
     await API.put('goGivers', '/goGivers/groups/editGroup', {
       credentials: 'include',
       response: true,
@@ -192,7 +226,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
         "groupId": group.id,
         "minMile": editGroupInfo.minMile,
         "moneyMile": editGroupInfo.moneyMile,
-        "startDate": editGroupInfo.startDate,
+        "startDate": utcStartDate?.toISOString(),
         "minDays": editGroupInfo.minDays
       }
     })
@@ -206,6 +240,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
 
 
 
+
   return (
     <View style={{ paddingHorizontal: 40 }}>
       <>
@@ -215,7 +250,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
               <Text>Back</Text>
             </Pressable>
             {isHost && !isEdit &&
-              <Pressable style={{ marginTop: 0, marginLeft: 'auto', marginRight: 20 }} onPress={() => { setIsEdit(true) }}>
+              <Pressable style={{ marginTop: 0, marginLeft: 'auto', marginRight: 20 }} onPress={openEdit}>
                 <Text>Edit</Text>
               </Pressable>
             }
@@ -298,7 +333,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
               <DatePicker
                 modal
                 mode="date"
-                minimumDate={new Date()}
+                minimumDate = {new Date(new Date().setDate(new Date().getDate() + 1))}
                 open={openDate}
                 date={new Date()}
                 onConfirm={(date) => {

@@ -3,7 +3,7 @@ import { View, Text, StyleSheet,Image,useWindowDimensions, Alert } from "react-n
 import CustomInput from "../../../components/CustomInput/CustomInput"
 import CustomButton from "../../../components/CustomButton/CustomButton"
 import { Linking } from 'react-native'
-import { Auth } from "aws-amplify";
+import { API, Auth } from "aws-amplify";
 import { useUserContext } from "../../../../UserContext";
 import { useDontUseContext } from "../../../DontUseContext";
 
@@ -13,6 +13,10 @@ const SignInScreen = ({navigation}:any)=>{
     const [loading,setLoading]= useState(false)
     const {setName} =useDontUseContext()
 
+    useEffect(()=>{
+        
+      },[])
+
    
 
     const onSignInPressed=async ():Promise<void>=>{
@@ -21,18 +25,39 @@ const SignInScreen = ({navigation}:any)=>{
         }
         setLoading(true)
         try{
+            
             const response = await Auth.signIn(username,password)
             setName(username);
-            navigation.navigate('StravaConnect',{username});
-            setUsername("")
-            setPassword("")
+            const url = `/goGivers/users/getUser?username=${username}`;
+      
+            API.get('goGivers', url, {
+              response: true
+            })
+            .then(response => {
+                setUsername("")
+                setPassword("")
+                if(response.data.user.stravaRefresh){
+                    navigation.navigate('MainNav',{username});
+                }
+                else{
+                    navigation.navigate('StravaConnect',{username});
+                }
+    
+            })
+            .catch(error => {
+                console.log("FFFerroreee",error);
+                Alert.alert('Oopseedaisy', error.message)
+                setLoading(false);
+            });
+           
         }
         catch(e){
             if(e instanceof Error){
                 Alert.alert('Oopseedaisy', e.message)
+                setLoading(false);
             }
+
         }
-        setLoading(false)
     
     }
 
@@ -82,3 +107,4 @@ const styles = StyleSheet.create({
     }
 })
 export default SignInScreen
+
