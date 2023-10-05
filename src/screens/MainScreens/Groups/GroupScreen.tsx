@@ -26,21 +26,49 @@ const GroupScreen = ({ navigation }: { navigation: any }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const url = `/goGivers/groups/getGroup?groupId=${encodeURIComponent(groupId)}`;
-        const response = await API.get('goGivers', url, {
+        // First, make the PUT request
+        console.log(groupId);
+        const putResponse = await API.put('goGivers', '/goGivers/groups/updateUserMiles', {
+          credentials: 'include',
+          body:{
+            "groupId":groupId
+          },
           response: true
         });
-        setGroupInfo(response.data.group);
 
+        const putResponse2 = await API.put('goGivers', '/goGivers/groups/updateStrikes', {
+          credentials: 'include',
+          body:{
+            "groupId":groupId
+          },
+          response: true
+        });
 
+        if(putResponse2){
+          console.log(putResponse2.data);
+          console.log(putResponse2.data.newUsersList);
+        }
+        
+       
+
+  
+        // Then, make the GET request with groupId
+        const url = `/goGivers/groups/getGroup?groupId=${encodeURIComponent(groupId)}`;
+        const getResponse = await API.get('goGivers', url, {
+          response: true
+        });
+  
+        setGroupInfo(getResponse.data.group);
       } catch (e) {
-        console.log("can't get groups list", e);
+        console.error("Error:", e);
       } finally {
         setLoading(false); // Set loading to false when data fetching is done
       }
     };
+  
     fetchData();
-  }, []);
+  }, [groupId]); // Add `groupId` as a dependency if it's used inside the useEffect
+  
 
 
   const calculateFontSize = (text: string) => {

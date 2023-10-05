@@ -32,6 +32,50 @@ AWS.config.update({ region: 'us-west-1' }); // Replace 'your-aws-region' with th
 
 app.use('/goGivers', require('./routes/goGivers'));
 
+exports.handler = async (event) => {
+  const currentTime = new Date().toISOString();
+  
+  // Scan the DynamoDB table for groups that need an update
+  // const params = {
+  //     TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
+  //     FilterExpression: 'nextScheduledUpdate <= :currentTime',
+  //     ExpressionAttributeValues: {
+  //         ':currentTime': currentTime
+  //     }
+  // };
+
+  try {
+      const data = await docClient.scan(params).promise();
+      const groupsToUpdate = data.Items;
+
+      // Invoke updateStrikes function for each group that needs an update
+      for (const group of groupsToUpdate) {
+          // Call updateStrikes function with group details
+          // group.id, group.startDate, group.usersList, etc.
+          await updateStrikes(group);
+          
+          // Calculate and set the next scheduled update time for the group
+          // For example, add 7 days to the current time
+          const nextScheduledUpdate = new Date();
+          nextScheduledUpdate.setDate(nextScheduledUpdate.getDate() + 7);
+          
+          // Update the nextScheduledUpdate attribute in DynamoDB for the group
+          await updateNextScheduledUpdateInDynamoDB(group.id, nextScheduledUpdate.toISOString());
+      }
+
+      return {
+          statusCode: 200,
+          body: JSON.stringify('Groups updated successfully.'),
+      };
+  } catch (error) {
+      console.error('Error updating groups: ', error);
+      return {
+          statusCode: 500,
+          body: JSON.stringify('Internal Server Error.'),
+      };
+  }
+};
+
 
 app.listen(3000, function() {
     console.log("App started listening on 3000")

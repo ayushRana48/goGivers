@@ -271,4 +271,6 @@ const updateTotalMile = async(req,res)=>{
 
 
 
+
+
 module.exports={test2,newUser,addStravaRefresh,reauthorizeStrava,getUser,getAllUsers,updateTotalMile};

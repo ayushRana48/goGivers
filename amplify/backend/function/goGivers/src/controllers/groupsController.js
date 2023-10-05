@@ -45,6 +45,7 @@ const newGroup = async (req, res) => {
       username: data.Item.username.toLowerCase(),
       Id: data.Item.id,
       mileage: 0,
+      runs:[],
       moneyRaised: 0,
       strikes: 0,
       stravaRefresh: data.Item.stravaRefresh,
@@ -397,6 +398,7 @@ const toggleInvite = async (req, res) => {
             username: userData.Item.username,
             Id: userData.Item.id,
             mileage: 0,
+            runs:[],
             moneyRaised: 0,
             strikes: 0,
             stravaRefresh: userData.Item.stravaRefresh,
@@ -615,6 +617,7 @@ const changeHost = async (req, res) => {
         username: userData.Item.username.toLowerCase(),
         Id: userData.Item.id,
         mileage: 0,
+        runs:[],
         moneyRaised: 0,
         strikes: 0,
         stravaRefresh: userData.Item.stravaRefresh,
@@ -703,9 +706,16 @@ const editGroup = async (req, res) => {
 
     if (startDate !== undefined) {
       // const dateRegex = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) \d{2} \d{4}$/; // Regular expression to match "Mon DD YYYY" format
-
+      const nextStrikeUpdate = moment(startDate).add(8, 'days');
+    
+      // Round nextStrikeUpdate to the nearest hour
+      const roundedNextStrikeUpdate = nextStrikeUpdate.startOf('hour');
+      
       updateExpression += 'startDate = :startDate, ';
       expressionAttributeValues[':startDate'] = startDate;
+  
+      updateExpression += 'nextStrikeUpdate = :nextStrikeUpdate, ';
+      expressionAttributeValues[':nextStrikeUpdate'] = roundedNextStrikeUpdate.toISOString(); 
     }
 
     if (minMile !== undefined) {
@@ -757,6 +767,299 @@ const editGroup = async (req, res) => {
 };
 
 
-module.exports = { newGroup, deleteGroup, sendInvite, toggleInvite, leaveGroup, changeHost, getGroup, editGroup };
+
+
+const updateUserMiles = async(req,res) => {
+  const {groupId} = req.body;
+  const currTime = moment().utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+
+
+  const groupParams = {
+    TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': groupId },
+  };
+
+  let groupData;
+
+  try{
+    groupData = (await docClient.get(groupParams).promise()).Item;
+    console.log(groupData);
+
+  }
+  catch(e){
+    console.error('Error getting group:', e);
+    res.status(400).json({ errorMessage: e });
+    return;
+  }
+  console.log("here11")
+
+
+  let floorTime;
+  let currentDate = new Date(currTime);
+  const daysSinceStart = Math.floor((currentDate - new Date(groupData.startDate)) / (1000 * 60 * 60 * 24));
+  if(!groupData.startDate || daysSinceStart<0){
+      res.json("not started yet");
+      return;
+  }
+
+  if(groupData.lastStravaCheck){
+    floorTime=groupData.lastStravaCheck;
+  }
+  else{
+    floorTime=groupData.startDate;
+  }
+
+  const usersList = groupData.usersList;
+
+  console.log(usersList);
+  const newUsersList = [];
+
+
+  for(let i=0;i<usersList.length;i++){
+    currUser = usersList[i];
+    if(!currUser.stravaRefresh){
+      continue;
+    }
+    const auth_link="https://www.strava.com/oauth/token";
+    let access_token;
+
+    try {
+      const response = await fetch(auth_link, {
+        method: 'post',
+        headers: {
+          'Accept': 'application/json, text/plain, */*',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          client_id: '111319',
+          client_secret: 'b03bfa9b476ff3e1536d632e33224d6b23f0f506',
+          refresh_token: currUser.stravaRefresh,
+          grant_type: 'refresh_token'
+        })
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to reauthorize Strava.'); // Handle non-2xx responses
+      }
+      const data = await response.json();
+      access_token=data.access_token 
+    } catch (error) {
+      console.error('Error reauthorizing Strava:', error);
+      res.status(500).json({ error: 'Failed to reauthorize Strava.' });
+      return;
+    }
+    console.log(access_token);
+  
+  
+    let runs=[];
+  
+  
+    const activitiesURL=`https://www.strava.com/api/v3/athlete/activities?access_token=${access_token}`
+    
+  
+    
+    try {
+      const response = await fetch(activitiesURL, {
+        method: 'get',
+        headers: {
+          'Accept': 'application/json, text/plain, */*',
+          'Content-Type': 'application/json'
+        },
+      });
+      const data = await response.json();
+      runs=data;
+      // res.json({data:data})
+    } catch (error) {
+      console.error('Error getting runs:', error);
+      res.status(500).json({ error: 'Failed to reauthorize Strava.' });
+      return;
+    }
+
+    let distanceUpdate=currUser.mileage;
+    let runsList =currUser.runs;
+    if(currUser.runs==undefined){
+      runsList=[];
+    }
+    for(let i=0;i<runs.length;i++){
+      const runStartDate = new Date(runs[i].start_date);
+      const floorTimeDate = new Date(floorTime);
+      if(runStartDate>=floorTimeDate){
+        distanceUpdate+=runs[i].distance/1609.34.toFixed(2);
+        const run = {date:runs[i].start_date,distance:runs[i].distance/1609.34.toFixed(2)};
+        runsList.push(run);
+      }
+      else{
+        console.log(floorTimeDate);
+        console.log(runs[i].start_date);
+        break;
+      }
+    }
+
+    const newUser = {...currUser,runs:runsList,mileage:distanceUpdate}
+    newUsersList.push(newUser);
+    
+  }
+
+  const updateGroupParams = {
+    TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': groupId},
+    UpdateExpression: 'set usersList = :usersList, lastStravaCheck = :lastStravaCheck', // Update the 'stravaRefresh' attribute
+    ExpressionAttributeValues: { // Define the ExpressionAttributeValues
+      ':usersList': newUsersList, 
+      ':lastStravaCheck':currTime,
+  }};
+
+  try {
+    await docClient.update(updateGroupParams).promise(); 
+    res.json({"newUsersList":newUsersList});
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ errorMessage:"can'update usersList" });
+  }
+  // console.log(newUsersList);
+
+
+}
+
+function calculateTotalDistance(runs) {
+  return runs.reduce((totalDistance, run) => totalDistance + run.distance, 0);
+}
+
+
+const updateStrikes =async (req,res)=>{
+  const {groupId} = req.body;
+  const currTime = moment().utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+
+
+
+  const groupParams = {
+    TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': groupId },
+  };
+
+
+
+
+  try{
+    groupData = (await docClient.get(groupParams).promise()).Item;
+    // console.log(groupData);
+
+  }
+  catch(e){
+    console.error('Error getting group:');
+    res.status(400).json('Couldnt get group');
+    return;
+  }
+  if(!groupData){
+    console.error('Error getting group:');
+    res.status(400).json('Couldnt get group');
+    return;
+  }
+
+  let nextStrikeUpdate = new Date(groupData.nextStrikeUpdate);
+
+  if(nextStrikeUpdate>new Date(currTime)){
+    res.json("not time to update strikes yet")
+    return;
+  }
+  
+
+  const startDate = new Date(groupData.startDate);
+  const usersList = groupData.usersList;
+  const updatedUsersList=[]
+  let currentDate = new Date(currTime);
+  const daysSinceStart = Math.floor((currentDate - startDate) / (1000 * 60 * 60 * 24));
+  // console.log(currentDate);
+  currentDate = new Date(currentDate - (daysSinceStart % 7) * 24 * 60 * 60 * 1000); // Subtract daysSinceStart % 7 from the original currentDate
+  // console.log(currentDate);
+  nextStrikeUpdate = new Date(nextStrikeUpdate);
+  nextStrikeUpdate.setDate(currentDate.getDate() + 8);
+  nextStrikeUpdate.setHours(nextStrikeUpdate.getHours(), 0, 0, 0);
+  // console.log(nextStrikeUpdate);
+
+  if(!nextStrikeUpdate){
+    res.json("error wtih nextdate")
+    return;
+  }
+
+
+
+
+
+  usersList.forEach(user => {
+    if(!groupData.startDate || daysSinceStart<0){
+      res.json("not started yet");
+      return;
+    }
+    
+    const intervalStart = new Date(startDate);
+    currentDate.setHours(intervalStart.getHours());
+    currentDate.setMinutes(intervalStart.getMinutes());
+    currentDate.setSeconds(intervalStart.getSeconds());
+    currentDate.setMilliseconds(intervalStart.getMilliseconds());
+    let strikes=0;
+    console.log(intervalStart,"intervalStart")
+    console.log(currentDate, "currentDate");
+    console.log(nextStrikeUpdate, "nextStrikeUpdate");
+
+
+    // Calculate 7-day intervals starting from user's start date or group start date
+    while (intervalStart < currentDate) {
+      console.log("count",intervalStart)
+        const intervalEnd = new Date(intervalStart);
+        intervalEnd.setDate(intervalEnd.getDate() + 7);
+
+        const runsInInterval = user.runs.filter(run => {
+            const runDate = new Date(run.date);
+            return runDate >= intervalStart && runDate < intervalEnd;
+        });
+
+        // console.log(runsInInterval.length, " runs")
+
+        // Check if user meets minDays and minMile criteria
+        if (runsInInterval.length < groupData.minDays || calculateTotalDistance(runsInInterval) < groupData.minMile) {
+            // Check if user has already received a strike this week
+            strikes+=1;
+        }
+
+        // Move to the next 7-day interval
+        intervalStart.setDate(intervalStart.getDate() + 7);
+    }
+    const newUser = {...user,"strikes":strikes}
+
+    updatedUsersList.push(newUser);
+  });
+
+  // console.log("nextStrikeUpdate Bottom" , nextStrikeUpdate)
+
+  if(!nextStrikeUpdate){
+    res.json("error2")
+    return;
+  }
+  const updateGroupParams = {
+    TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': groupId},
+    UpdateExpression: 'set usersList = :usersList, nextStrikeUpdate = :nextStrikeUpdate', // Update the 'stravaRefresh' attribute
+    ExpressionAttributeValues: { // Define the ExpressionAttributeValues
+      ':usersList': updatedUsersList, 
+      ':nextStrikeUpdate':nextStrikeUpdate.toISOString(),
+  }};
+
+  console.log(updateGroupParams);
+  // res.json({"newUsersList":updatedUsersList});
+
+
+
+  try {
+    await docClient.update(updateGroupParams).promise(); 
+    res.json({"newUsersList":updatedUsersList,"nextStrikeUpdate":nextStrikeUpdate.toISOString()});
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ errorMessage:"can'update usersList" });
+  }
+
+}
+
+module.exports = { newGroup, deleteGroup, sendInvite, toggleInvite, leaveGroup, changeHost, getGroup, editGroup, updateUserMiles, updateStrikes };
 
 

@@ -12,6 +12,9 @@ router.put('/groups/leaveGroup', groupController.leaveGroup);
 router.put('/groups/changeHost', groupController.changeHost);
 router.get('/groups/getGroup', groupController.getGroup);
 router.put('/groups/editGroup', groupController.editGroup);
+router.put('/groups/updateUserMiles', groupController.updateUserMiles);
+router.put('/groups/updateStrikes', groupController.updateStrikes);
+
 
 router.post('/users/newUser', userController.newUser);
 router.put('/users/addStravaRefresh', userController.addStravaRefresh);
@@ -23,3 +26,5 @@ router.get('/users/getAllUsers', userController.getAllUsers);
 
 
 module.exports = router;
+
+

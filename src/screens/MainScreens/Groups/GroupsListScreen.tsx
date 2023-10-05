@@ -34,6 +34,7 @@ const GroupsListScreen = ({ navigation }: any) => {
       else {
         setGroups([])
         setGroupsData([])
+        setLoading(false);
       }
     }
 
