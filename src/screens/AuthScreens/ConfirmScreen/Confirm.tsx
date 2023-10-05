@@ -42,7 +42,7 @@ const ConfirmScreen = ({navigation}:any) => {
         console.log("not working", e);
       });
 
-      navigation.navigate("MainNav",{username})
+      navigation.navigate("StravaConnect",{username})
     }
     catch (e) {
       if(e instanceof Error){

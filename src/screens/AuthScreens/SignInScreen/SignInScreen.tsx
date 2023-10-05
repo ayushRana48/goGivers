@@ -23,7 +23,7 @@ const SignInScreen = ({navigation}:any)=>{
         try{
             const response = await Auth.signIn(username,password)
             setName(username);
-            navigation.navigate('MainNav',{username});
+            navigation.navigate('StravaConnect',{username});
             setUsername("")
             setPassword("")
         }

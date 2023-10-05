@@ -6,10 +6,8 @@ import SignInScreen from './screens/AuthScreens/SignInScreen/SignInScreen';
 import SignUpScreen from './screens/AuthScreens/SignUpScreen/SignUpScreen';
 import ResetScreen from './screens/AuthScreens/ResetScreen/ResetScreen';
 import ConfirmScreen from './screens/AuthScreens/ConfirmScreen/Confirm';
-import Profile from './screens/MainScreens/ProfileScreen';
 import MainNav from './MainNav';
-import { UserProvider } from '../UserContext';
-
+import StravaConnectScreen from './screens/AuthScreens/StravaConnectScreen/StravaConnect';
 export default function Nav() {
     const Stack = createNativeStackNavigator();
   
@@ -27,6 +25,7 @@ const MyTheme = {
             <Stack.Screen name = "SignUp" component={SignUpScreen}/>
             <Stack.Screen name = "ForgotPassword" component={ResetScreen}/>
             <Stack.Screen name = "ConfirmEmail" component={ConfirmScreen}/>
+            <Stack.Screen name = "StravaConnect" component={StravaConnectScreen}/>
             <Stack.Screen name = "MainNav" component={MainNav}/>
         </Stack.Navigator>
     </NavigationContainer>

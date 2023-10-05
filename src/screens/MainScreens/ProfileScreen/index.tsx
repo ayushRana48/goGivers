@@ -82,9 +82,7 @@ const Profile = ({navigation}:any) => {
     <View style={{padding:40}}>
       <Text style={{fontSize: 24, alignSelf: 'center'}}>Home</Text>
       <View style={{marginTop:60}}>
-        <CustomButton text='Connect to Strava' onPress={getAuth} type={'primary'} bgColor='#FC4C02' color='white'></CustomButton>
-        {missingScope?<Text style={{fontSize: 12, alignSelf: 'center', color:'red'}}>Missing read all scope. Try Strava Auth Again</Text>
-        :<Text style={{fontSize: 24, alignSelf: 'center'}}>Welcome {name}</Text>}
+        <Text style={{fontSize: 24, alignSelf: 'center'}}>Welcome {name}</Text>
         <Text style={{fontSize: 18, alignSelf: 'center',marginTop:20}}>Total Miles: {user.totalMileage}</Text>
         <View style={{marginTop:60}}>
           <CustomButton text="Logout" onPress={Logout} type={'primary'} />
