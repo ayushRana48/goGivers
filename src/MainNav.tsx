@@ -50,8 +50,7 @@ export default function MainNav() {
         response: true,
         body: {
           "username": updatedUser.id,
-          "currTotalMile": updatedUser.totalMileage,
-          "lastStravaCheck": updatedUser.lastStravaCheck,
+          "currTotalMile": 0,
           "refresh": updatedUser.stravaRefresh,
           "createdAt": updatedUser.createdAt,
         }

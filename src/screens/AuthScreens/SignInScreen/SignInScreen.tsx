@@ -36,10 +36,13 @@ const SignInScreen = ({navigation}:any)=>{
             .then(response => {
                 setUsername("")
                 setPassword("")
+                console.log('hereee')
                 if(response.data.user.stravaRefresh){
+                    setLoading(false);
                     navigation.navigate('MainNav',{username});
                 }
                 else{
+                    setLoading(false);
                     navigation.navigate('StravaConnect',{username});
                 }
     

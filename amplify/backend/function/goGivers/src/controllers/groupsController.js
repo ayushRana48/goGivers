@@ -854,7 +854,8 @@ const updateUserMiles = async(req,res) => {
     let runs=[];
   
   
-    const activitiesURL=`https://www.strava.com/api/v3/athlete/activities?access_token=${access_token}`
+    const activitiesURL=`https://www.strava.com/api/v3/athlete/activities?access_token=${access_token}&per_page=200&page=1`
+    console.log(activitiesURL);
     
   
     
@@ -868,7 +869,7 @@ const updateUserMiles = async(req,res) => {
       });
       const data = await response.json();
       runs=data;
-      console.log(runs)
+      // console.log(runs)
       // res.json({data:data})
     } catch (error) {
       console.error('Error getting runs:', error);
@@ -881,7 +882,7 @@ const updateUserMiles = async(req,res) => {
     let floorTimeDate= new Date(groupData.startDate);
 
     if(currUser.runs && currUser.runs.length>0){
-      console.log(currUser)
+      // console.log(currUser)
       runsList=currUser.runs;
       floorTimeDate = new Date(currUser.runs[0].date);
       console.log("useSame",currUser.runs[0].date,"useSame",floorTimeDate)
@@ -889,7 +890,7 @@ const updateUserMiles = async(req,res) => {
 
 
 
-    
+    console.log(floorTime);
     for(let i=0;i<runs.length;i++){
       const runStartDate = new Date(runs[i].start_date);
       if(runStartDate>floorTimeDate){
@@ -912,6 +913,8 @@ const updateUserMiles = async(req,res) => {
     
   }
 
+
+
   
   const updateGroupParams = {
     TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
@@ -922,6 +925,7 @@ const updateUserMiles = async(req,res) => {
       ':lastStravaCheck':currTime,
   }};
 
+
   try {
     await docClient.update(updateGroupParams).promise(); 
     res.json({"newUsersList":newUsersList});
@@ -929,7 +933,7 @@ const updateUserMiles = async(req,res) => {
     console.log(err);
     res.status(400).json({ errorMessage:"can'update usersList" });
   }
-  // console.log(newUsersList);
+  console.log(newUsersList);
 
 
 }
@@ -1038,6 +1042,10 @@ const updateStrikes =async (req,res)=>{
         if (runsInInterval.length < groupData.minDays || calculateTotalDistance(runsInInterval) < groupData.minMile) {
             // Check if user has already received a strike this week
             strikes+=1;
+            if(strikes>3){
+              strikes = 3;
+            
+            }
         }
 
         // Move to the next 7-day interval
@@ -1078,6 +1086,215 @@ const updateStrikes =async (req,res)=>{
 
 }
 
-module.exports = { newGroup, deleteGroup, sendInvite, toggleInvite, leaveGroup, changeHost, getGroup, editGroup, updateUserMiles, updateStrikes };
+
+const findLoser =async(req,res)=>{
+  const {groupId} = req.body;
+  const groupParams = {
+    TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': groupId },
+  };
+
+  try{
+    groupData = (await docClient.get(groupParams).promise()).Item;
+    // console.log(groupData);
+
+  }
+  catch(e){
+    console.error('Error getting group:');
+    res.status(400).json('Couldnt get group');
+    return;
+  }
+  if(!groupData){
+    console.error('Error getting group:');
+    res.status(400).json('Couldnt get group');
+    return;
+  }
+
+  if(groupData.currLoser && groupData.currLoser!=null){
+    console.log(groupData.currLoser)
+    res.json('loser already found')
+    return;
+  }
+
+
+  const losersList = [];
+
+  let totalGroupDistance =0;
+
+  for(let i=0;i<groupData.usersList.length;i++){
+    const currUser = groupData.usersList[i];
+    if(currUser.strikes>=3){
+      losersList.push({user:currUser.username,totalDistance:currUser.mileage,totalDays:currUser.runs.length});
+    }
+    totalGroupDistance+=currUser.mileage;
+  }
+
+  losersList.sort((a, b) => {
+    if (b.totalDistance !== a.totalDistance) {
+      return a.totalDistance - b.totalDistance;
+    }
+    return a.totalDays - b.totalDays;
+  });
+
+  if(losersList.length==0){
+    res.json("no Loser")
+    return;
+  }
+  const currLoser = losersList[0].user;
+  console.log(losersList);
+
+  const userParams = {
+    TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': currLoser.toLowerCase() },
+  };
+
+  let user;
+  try {
+    const data = await docClient.get(userParams).promise();
+    if(data.Item==null){
+      res.status(400).json({ errorMessage:'User not found' });
+      return;
+    }
+    user = data.Item;
+  }
+    catch(error){
+      console.log("error",error);
+  }
+
+
+  let donations=[];
+  const randomId = Math.random().toString(36).substring(2, 10);
+  console.log(totalGroupDistance);
+  const totalAmount = (totalGroupDistance * groupData.moneyMile).toFixed(2);
+  if(user.donations){
+    donations=user.donations;
+  }
+
+  const newDonation = {
+    Id: randomId,
+    username: currLoser,
+    groupId: groupId,
+    amount: totalAmount,
+    paid: false,
+  }
+  donations.push(newDonation);
+
+  let records=[];
+
+  if(groupData.records){
+    records=groupData.records;
+  }
+
+  const newRecord = {
+    Id: randomId,
+    loser: currLoser,
+    amount: totalAmount,
+    paid: false,
+    date: new Date().toISOString()
+  }
+  records.push(newRecord);
+
+  console.log(records);
+
+
+
+
+
+  const updateGroupParams = {
+    TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': groupId},
+    UpdateExpression: 'set currLoser = :currLoser, records = :records', // Update the 'stravaRefresh' attribute
+    ExpressionAttributeValues: { // Define the ExpressionAttributeValues
+      ':currLoser': currLoser, 
+      ':records': records,
+  }};
+
+  const updateUserParams = {
+    TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': currLoser.toLowerCase() },
+    UpdateExpression: 'set donations = :donations', // Update the 'stravaRefresh' attribute
+    ExpressionAttributeValues: { // Define the ExpressionAttributeValues
+      ':donations': donations // Set the value of the 'stravaRefresh' attribute to the 'refresh' variable
+    }
+  };
+
+
+  try {
+    await docClient.update(updateGroupParams).promise(); 
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ errorMessage:"can'update group records" });
+    return;
+  }
+
+  try {
+    await docClient.update(updateUserParams).promise(); 
+    res.json({'loser':currLoser});
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ errorMessage:"can'update user donations" });
+  }
+
+}
+
+
+const restartGroup = async (req, res) => {
+  const { groupId } = req.body;
+  const groupParams = {
+    TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
+    Key: { 'id': groupId },
+  };
+
+  try {
+    let groupData = (await docClient.get(groupParams).promise()).Item;
+
+    // Update usersList
+
+    let updatedUsersList=[]
+  
+    if (groupData.usersList && Array.isArray(groupData.usersList)) {
+      updatedUsersList = groupData.usersList.map(user => {
+        return {
+          ...user,
+          runs: [],         // Empty runs array
+          mileage: 0,       // Set mileage to 0
+          moneyRaised: 0,   // Set moneyRaised to 0
+          strikes: 0        // Set strikes to 0
+        };
+      });
+    
+    }
+
+
+    // Send a success response
+    const updateGroupParams = {
+      TableName: 'GroupsModel-ssprzv2hibheheyjmea3pzhvle-staging',
+      Key: { 'id': groupId},
+      UpdateExpression: 'set usersList = :usersList, currLoser = :currLoser, startDate = :startDate, lastStravaCheck=:lastStravCheck,  nextStrikeUpdate = :nextStrikeUpdate, moneyPool = :moneyPool', // Update the 'stravaRefresh' attribute
+      ExpressionAttributeValues: { // Define the ExpressionAttributeValues
+        ':usersList': updatedUsersList, 
+        ':currLoser': "", 
+        ':startDate': "", 
+        ':nextStrikeUpdate': "", 
+        ':moneyPool': 0, 
+        ':lastStravCheck':""
+    }};
+
+    try {
+      await docClient.update(updateGroupParams).promise();
+      res.status(200).json({ message: 'Group restarted successfully.' });
+    } catch (err) {
+      console.log(err);
+      res.status(400).json({ errorMessage:"can'update group records" });
+    }
+  
+  } catch (e) {
+    console.error('Error getting group:', e);
+    res.status(400).json('Couldn\'t get group');
+  }
+};
+
+
+module.exports = { newGroup, deleteGroup, sendInvite, toggleInvite, leaveGroup, changeHost, getGroup, editGroup, updateUserMiles, updateStrikes, findLoser,restartGroup };
 
 

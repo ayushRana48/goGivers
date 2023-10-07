@@ -14,6 +14,8 @@ router.get('/groups/getGroup', groupController.getGroup);
 router.put('/groups/editGroup', groupController.editGroup);
 router.put('/groups/updateUserMiles', groupController.updateUserMiles);
 router.put('/groups/updateStrikes', groupController.updateStrikes);
+router.put('/groups/findLoser', groupController.findLoser);
+router.put('/groups/restartGroup', groupController.restartGroup);
 
 
 router.post('/users/newUser', userController.newUser);

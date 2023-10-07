@@ -148,27 +148,12 @@ const getAllUsers = async (req, res) => {
 };
 
 const updateTotalMile = async(req,res)=>{
-  const { username,currTotalMile,lastStravaCheck,refresh,createdAt } = req.body;
+  const { username,currTotalMile,refresh,createdAt } = req.body;
   const parsedCurrTotalMile = isNaN(currTotalMile) ? Number(currTotalMile) : currTotalMile;
 
-  const currTime = moment().utc().format('YYYY-MM-DDTHH:mm:ss.SSSZ');
-
-  const updateUserParams = {
-    TableName: 'UsersModel-ssprzv2hibheheyjmea3pzhvle-staging',
-    Key: { 'id': username.toLowerCase() },
-    UpdateExpression: 'set lastStravaCheck = :lastStravaCheck', // Update the 'stravaRefresh' attribute
-    ExpressionAttributeValues: { // Define the ExpressionAttributeValues
-      ':lastStravaCheck': currTime // Set the value of the 'stravaRefresh' attribute to the 'refresh' variable
-    }
-  };
 
   let floorTime;
-  if(lastStravaCheck){
-    floorTime=lastStravaCheck;
-  }
-  else{
-    floorTime=createdAt;
-  }
+  floorTime=createdAt
 
   const auth_link="https://www.strava.com/oauth/token"
   let access_token;
@@ -204,14 +189,8 @@ const updateTotalMile = async(req,res)=>{
   let runs=[];
 
 
-  const activitiesURL=`https://www.strava.com/api/v3/athlete/activities?access_token=${access_token}`
+  const activitiesURL=`https://www.strava.com/api/v3/athlete/activities?access_token=${access_token}&per_page=200&page=1`
   
-
-  try {
-    await docClient.update(updateUserParams).promise(); 
-  } catch (err) {
-    res.status(400).json({ errorMessage:"can'update lastStravaRefresh" });
-  }
 
   
   try {

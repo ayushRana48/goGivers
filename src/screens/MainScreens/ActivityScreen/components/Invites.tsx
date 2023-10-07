@@ -44,11 +44,14 @@ const Invites = ({ navigation }: { navigation: any }) => {
                     const newGroupsList = [...user.groups, groupId]; // Create a new array with groupId appended
                     const newUser = { ...user, groups: newGroupsList }; // Create a new user object with the updated groups array
                     setUser(newUser); // Update the user state with the new user object
+                    console.log(response.data)
+                    console.log(newUser)
+
                      
                 }
 
             })
-            .catch(error => console.log(error))
+            .catch(error => console.log("djfjd",error))
     }
 
 

@@ -7,6 +7,7 @@ import GroupScreen from './GroupScreen'
 import GroupSettings from './GroupSettings';
 import InviteSearch from './components/InviteSearch';
 import { GroupsProvider } from './GroupsContext';
+import GroupHistoryScreen from './GroupHistoryScreen';
 
 const GroupsNav = ({navigation}:any) => {
 
@@ -19,6 +20,7 @@ const GroupsNav = ({navigation}:any) => {
           <Stack.Screen name = "GroupScreen" component={GroupScreen}/>
           <Stack.Screen name = "NewGroup" component={NewGroupScreen}/>
           <Stack.Screen name = "GroupSettings" component={GroupSettings}/>
+          <Stack.Screen name = "GroupHistory" component={GroupHistoryScreen}/>
           <Stack.Screen name = "InviteSearch" component={InviteSearch}/>
 
 

@@ -10,6 +10,7 @@ import { useRoute } from '@react-navigation/native';
 import DatePicker from 'react-native-date-picker'
 import MemberSettings from './components/MemberSettings';
 import { useGroupsContext } from './GroupsContext';
+import { restartGroup } from '../../../../amplify/backend/function/goGivers/src/controllers/groupsController';
 
 const GroupSettings = ({ navigation }: { navigation: any }) => {
   const { user,setUser } = useUserContext();
@@ -196,6 +197,37 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
       .catch(error => Alert.alert(error.response.data.errorMessage))
   }
 
+  async function restartGroup() {
+
+    await API.put('goGivers', '/goGivers/groups/restartGroup', {
+      credentials: 'include',
+      response: true,
+      body: {
+        "groupId": group.id
+      }
+    })
+      .then((response) => {
+        console.log(response.data)
+        let updatedUsersList=[]
+        if (groupsData.usersList) {
+           updatedUsersList = groupsData.usersList.map((user: any) => {
+            return {
+              ...user,
+              runs: [],         // Empty runs array
+              mileage: 0,       // Set mileage to 0
+              moneyRaised: 0,   // Set moneyRaised to 0
+              strikes: 0        // Set strikes to 0
+            };
+          });
+        }
+        const newGroup={...groupsData,usersList:updatedUsersList,currLoser:"",startDate: "", nextStrikeUpdate: "", moneyPool: 0, lastStravCheck:""}
+        console.log(newGroup);
+        setGroupsData(newGroup)
+        navigation.goBack()
+      })
+      .catch(error => Alert.alert(error.response.data.errorMessage))
+  }
+
   function openEdit(){
     if( editGroupInfo.startDate && new Date(editGroupInfo.startDate)<=new Date()){
       Alert.alert("Can't edit, already started")
@@ -333,7 +365,7 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
               <DatePicker
                 modal
                 mode="date"
-                minimumDate = {new Date(new Date().setDate(new Date().getDate() + 1))}
+                // minimumDate = {new Date(new Date().setDate(new Date().getDate() + 1))}
                 open={openDate}
                 date={new Date()}
                 onConfirm={(date) => {
@@ -392,6 +424,12 @@ const GroupSettings = ({ navigation }: { navigation: any }) => {
                   <CustomButton text='Delete Group' type='primary' bgColor='red' onPress={deleteGroup} />
                   :
                   <CustomButton text='Leave Group' type='primary' bgColor='red' onPress={() => leaveGroup(user.id)} />
+
+                }
+
+                {
+                  group.currLoser && 
+                  <CustomButton text='Restart Group' type='primary' onPress={restartGroup} />
 
                 }
               </>

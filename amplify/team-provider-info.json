@@ -28,7 +28,7 @@
       "function": {
         "goGivers": {
           "deploymentBucketName": "amplify-authtut-staging-51032-deployment",
-          "s3Key": "amplify-builds/goGivers-66695041754c43344b47-build.zip"
+          "s3Key": "amplify-builds/goGivers-53507a48384d52533465-build.zip"
         }
       }
     }

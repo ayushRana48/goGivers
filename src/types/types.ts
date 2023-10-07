@@ -8,6 +8,22 @@ export type Run ={
   distance: number;
 }
 
+export type Donation= {
+  Id: string
+  username: string
+  groupId: string
+  amount: number
+  paid: boolean
+}
+
+export type Record={
+  Id: string
+  loser:string
+  amount:number
+  paid: boolean
+  date: Date
+}
+
 export type UserType = {
   username: string;
   Id: string;
@@ -33,7 +49,8 @@ export type GroupsModel = {
   lastStavaCheck?: Date;
   createdAt?: Date;
   nextStrikeUpdate?: Date;
-
+  records:Record[];
+  currLoser:String;
 
 };
 
@@ -49,5 +66,6 @@ export type UsersModel = {
   invites?: InviteType[];
   lastStavaCheck?: Date;
   createdAt?: Date;
+  donations:Donation[]
 
 };

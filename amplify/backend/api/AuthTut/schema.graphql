@@ -3,6 +3,22 @@ type Invite {
   groupId: String
 }
 
+type Donation {
+  Id: ID
+  username: String
+  groupId: String
+  amount: Float
+  paid: Boolean
+}
+
+type Record{
+  Id: ID
+  loser:String
+  amount:Float
+  paid: Boolean
+  date: AWSDate
+}
+
 type User {
   username: String
   Id: ID
@@ -32,6 +48,9 @@ type GroupsModel @model @auth(rules: [{allow: public}]) {
   moneyPool:Float
   lastStravaCheck: AWSDate
   nextStrikeUpdate: AWSDate
+  currLoser: String
+  Records: [Record]
+  
 }
 
 type UsersModel @model @auth(rules: [{allow: public}]) {
@@ -45,5 +64,6 @@ type UsersModel @model @auth(rules: [{allow: public}]) {
   stravaRefresh: String
   invites: [Invite]
   lastStravaCheck: AWSDate
+  donations:[Donation]
 }
  

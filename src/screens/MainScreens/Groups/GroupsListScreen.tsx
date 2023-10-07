@@ -20,19 +20,16 @@ const GroupsListScreen = ({ navigation }: any) => {
     navigation.navigate('NewGroup');
   }
 
-  const [groups, setGroups] = useState<string[]>();
   const [loading, setLoading] = useState(true); // State for loading
 
 
   useEffect(() => {
     if (user?.id) {
       if (user.groups) {
-        setGroups(user.groups);
         setGroupsData(user.groups);
         setLoading(false);
       }
       else {
-        setGroups([])
         setGroupsData([])
         setLoading(false);
       }
@@ -41,7 +38,6 @@ const GroupsListScreen = ({ navigation }: any) => {
 
   }, [user]);
 
-  const groupItemList = groups?.map(x => <GroupItem key={x} groupName={x} navigation={navigation}></GroupItem>)
 
 
   return (
