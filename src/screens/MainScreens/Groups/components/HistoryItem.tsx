@@ -15,11 +15,11 @@ const HistoryItem = ({ item,groupId} :{item:Record;groupId:String|undefined}) =>
       <View style={styles.emphasizedContainer}>
         <Text style={styles.emphasizedText}>${amount}</Text>
         <Text style={styles.emphasizedText}>{loser}</Text>
+        {groupId && <Text>{groupId}</Text>}
       </View>
       <View style={styles.detailsContainer}>
         <Text>{`Paid: ${paid ? 'Yes' : 'No'}`}</Text>
         {date && <Text>{date.toString().substring(0,10)}</Text>}
-        {groupId && <Text>{groupId}</Text>}
       </View>
     </View>
   );

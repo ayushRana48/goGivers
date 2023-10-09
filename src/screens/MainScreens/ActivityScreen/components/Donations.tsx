@@ -3,7 +3,7 @@ import { View, Text, Button, StyleSheet, Alert, Pressable, Image, ScrollView, Ac
 import { Auth, API } from "aws-amplify";
 import 'react-native-url-polyfill/auto'
 import { useUserContext } from '../../../../../UserContext';
-import HistoryItem from '../../Groups/components/HistoryItem';
+import DonationItem from './DonationItem';
 
 const Donations = ({ navigation }: { navigation: any }) => {
     const { user, setUser } = useUserContext();
@@ -28,7 +28,6 @@ const Donations = ({ navigation }: { navigation: any }) => {
                 setDonations(response.data.user.donations)
 
             }
-            console.log(response.data.user, "fsfdffsf");
             setLoading(false);
 
           })
@@ -40,7 +39,7 @@ const Donations = ({ navigation }: { navigation: any }) => {
   
       fetchData();
     }
-    }, [user]);
+    }, [user?.username]);
 
 
 
@@ -62,7 +61,7 @@ const Donations = ({ navigation }: { navigation: any }) => {
 
     if (donations?.length > 0) {
         historyList = donations.map((h:any) => {
-            return <HistoryItem item={h} groupId={h.groupId}></HistoryItem>
+            return <DonationItem item={h} groupId={h.groupId} navigation={navigation}></DonationItem>
         })
     }
 
