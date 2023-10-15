@@ -4,11 +4,13 @@ import { Auth, API } from "aws-amplify";
 import 'react-native-url-polyfill/auto'
 import CustomInput from '../../../../components/CustomInput/CustomInput';
 import { useUserContext } from '../../../../../UserContext';
+import { useGroupsContext } from '../../Groups/GroupsContext';
 import { useRoute } from '@react-navigation/native';
 import 'react-native-url-polyfill/auto'
 
 const Invites = ({ navigation }: { navigation: any }) => {
     const { user, setUser } = useUserContext();
+    const {group,setGroup} = useGroupsContext();
     const [invites, setInvites] = useState<{ sender: String, groupId: String }[]>([]);
     const [openInvite, setOpenInvite] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -44,6 +46,8 @@ const Invites = ({ navigation }: { navigation: any }) => {
                     const newGroupsList = [...user.groups, groupId]; // Create a new array with groupId appended
                     const newUser = { ...user, groups: newGroupsList }; // Create a new user object with the updated groups array
                     setUser(newUser); // Update the user state with the new user object
+                    const newGroupsList2 = [...group, groupId];
+                    setGroup(newGroupsList2)
                     console.log(response.data)
 
                      

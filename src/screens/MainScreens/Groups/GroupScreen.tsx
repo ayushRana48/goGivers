@@ -169,7 +169,7 @@ const GroupScreen = ({ navigation }: { navigation: any }) => {
         distance += mileage;
       }
     }
-    return distance.toFixed(2)
+    return distance;
   }
 
 
@@ -189,12 +189,14 @@ const GroupScreen = ({ navigation }: { navigation: any }) => {
             <View style={{ marginTop: 20 }}>
               {groupInfo?.currLoser && <Text style={{ fontSize: 22, color: 'red' }}>Loser : {groupInfo?.currLoser}</Text>}
               <View style={{ flexDirection: 'row' }}>
-                <Text style={{ fontSize: calculateFontSize(groupInfo?.moneyPool?.toFixed(2) || "0.00"), fontWeight: '300', }}>
+                <Text style={{ fontSize:20, fontWeight: '300' }}>
                   {"Donation Pool:  "}
                 </Text>
-                <Text style={{ fontSize: calculateFontSize(groupInfo?.moneyPool?.toFixed(2) || "0.00"), fontWeight: '700', }}>
-                  ${getDistance()}
+                {groupInfo?.moneyMile && 
+                <Text style={{ fontSize: calculateFontSize((getDistance() * groupInfo?.moneyMile).toFixed(2)), fontWeight: '700', }}>
+                  ${(getDistance() * groupInfo?.moneyMile).toFixed(2)}
                 </Text>
+                }
               </View>
               {currentInterval.length > 0 &&
                 <View>
